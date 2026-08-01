@@ -29,11 +29,11 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm ci || npm install
+        run: npm ci
 
-      - name: Build & Publish Release
-        uses: samuelmeuli/action-electron-builder@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          release: true
+      - name: Build & Package Electron App
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --publish always
+
 
