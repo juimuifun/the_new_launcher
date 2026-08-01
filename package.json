@@ -17,6 +17,9 @@
     "email": "developer@example.com"
   },
   "license": "MIT",
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
   "devDependencies": {
     "electron": "^31.2.0",
     "electron-builder": "^24.13.3"
@@ -27,6 +30,8 @@
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
     "publish": {
       "provider": "github",
+      "owner": "juimuifun",
+      "repo": "the_new_launcher",
       "releaseType": "release"
     },
     "directories": {
