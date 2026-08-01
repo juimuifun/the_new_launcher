@@ -1,63 +1,247 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full select-none font-sans">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The New Launcher</title>
-  <link rel="stylesheet" href="styles.css">
+  <title data-i18n="appTitle">The New Launcher</title>
+  <link rel="stylesheet" href="dist/output.css">
+  <style>
+    :root {
+      --primary-color: #8b5cf6;
+    }
+    .custom-accent-bg {
+      background-color: var(--primary-color) !important;
+    }
+    .custom-accent-text {
+      color: var(--primary-color) !important;
+    }
+    .custom-accent-glow {
+      box-shadow: 0 10px 30px -5px var(--primary-color);
+    }
+  </style>
 </head>
-<body>
-  <div class="app-container">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="logo-icon">🎮</div>
-        <span class="brand-name">Launcher</span>
-      </div>
-      <nav class="nav-menu">
-        <button class="nav-item active">
-          <span class="icon">🏠</span> Home
-        </button>
-        <button class="nav-item">
-          <span class="icon">📦</span> Modpacks
-        </button>
-        <button class="nav-item">
-          <span class="icon">⚙️</span> Settings
-        </button>
-      </nav>
-      <div class="user-profile">
-        <div class="avatar">STEVE</div>
-        <div class="user-info">
-          <span class="username">Player</span>
-          <span class="status">Offline</span>
+<body class="h-full flex items-center justify-center p-0 m-0 bg-transparent antialiased overflow-hidden">
+
+  <!-- Outer Rounded Launcher Container (Fixed Size 960x600) -->
+  <div class="w-[960px] h-[600px] rounded-3xl overflow-hidden bg-slate-950 shadow-2xl flex relative">
+    
+    <!-- BACKGROUND MEDIA CONTAINER (FULL LAUNCHER) -->
+    <div id="bg-media-container" class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+      <!-- Background Video -->
+      <video id="bg-video" class="absolute inset-0 w-full h-full object-cover hidden" autoplay loop muted playsinline></video>
+      <!-- Background Image Fallback -->
+      <div id="bg-image" class="absolute inset-0 bg-cover bg-center filter brightness-75 hidden" style="background-image: url('assets/bg.png');"></div>
+      <!-- Dark Overlay Gradient for Readability -->
+      <div class="absolute inset-0 bg-gradient-to-r from-[#0c101c]/90 via-slate-950/60 to-slate-950/40"></div>
+    </div>
+
+    <!-- Top-Right Window Controls (Only Minimize & Close) -->
+    <div class="absolute top-4 right-4 z-50 flex items-center gap-3 no-drag">
+      <!-- Minimize Window -->
+      <button id="win-btn-minimize" title="Minimize" class="text-slate-400 hover:text-white transition-colors p-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+      </button>
+      
+      <!-- Close Window -->
+      <button id="win-btn-close" title="Close" class="text-slate-400 hover:text-rose-400 transition-colors p-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- 1/3 SIDEBAR CONTAINER (Centered Content, No Header/Footer text) -->
+    <aside class="w-1/3 min-w-[320px] max-w-[340px] bg-[#0c101c]/80 backdrop-blur-md px-8 pt-8 pb-8 flex flex-col z-20 h-full relative">
+      
+      <!-- Draggable Area at top of sidebar -->
+      <div class="drag absolute top-0 left-0 right-0 h-10"></div>
+
+      <!-- MAIN AUTH CONTENT CONTAINER (flex-col, space between top and bottom) -->
+      <div class="w-full flex flex-col items-center flex-1">
+        
+        <!-- TOP: Logo + Title + Form Fields -->
+        <div class="w-full flex flex-col items-center text-center mt-10">
+
+          <!-- Logo Badge / Icon -->
+          <div id="logo-container" class="w-16 h-16 rounded-2xl custom-accent-bg custom-accent-glow flex items-center justify-center text-white font-black text-2xl tracking-wider shadow-lg overflow-hidden">
+            <span id="logo-text">JF</span>
+            <img id="logo-img" class="w-full h-full object-cover hidden" alt="Logo">
+          </div>
+
+          <!-- LOGIN FORM -->
+          <div id="form-login-container" class="w-full flex flex-col items-center mt-3">
+            <h2 class="text-2xl font-black text-white tracking-tight mb-5" data-i18n="welcomeTitle">Sign in</h2>
+
+            <form id="form-login" class="w-full flex flex-col items-center gap-3">
+              <div class="w-full">
+                <input type="text" id="input-login-user" class="w-full bg-[#050811] border border-slate-800/90 rounded-2xl px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition-all text-left leading-none" data-i18n-placeholder="placeholderUsername" placeholder="USERNAME">
+              </div>
+              <div class="w-full">
+                <input type="password" id="input-login-pass" class="w-full bg-[#050811] border border-slate-800/90 rounded-2xl px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition-all text-left leading-none" data-i18n-placeholder="placeholderPassword" placeholder="PASSWORD">
+              </div>
+
+              <div class="w-full flex items-center justify-start gap-2.5 pt-0.5 px-1">
+                <input type="checkbox" id="stay-signed-in" checked class="w-4.5 h-4.5 rounded bg-slate-900 border-slate-800 text-purple-600 focus:ring-0 focus:ring-offset-0 accent-purple-600 cursor-pointer">
+                <label for="stay-signed-in" class="text-sm text-slate-300 font-bold cursor-pointer" data-i18n="staySignedIn">Stay signed in</label>
+              </div>
+            </form>
+          </div>
+
+          <!-- REGISTER FORM -->
+          <div id="form-register-container" class="w-full flex flex-col items-center mt-3 hidden">
+            <h2 class="text-2xl font-black text-white tracking-tight mb-5" data-i18n="createTitle">Create account</h2>
+
+            <form id="form-register" class="w-full flex flex-col items-center gap-3">
+              <div class="w-full">
+                <input type="text" id="input-reg-user" class="w-full bg-[#050811] border border-slate-800/90 rounded-2xl px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition-all text-left leading-none" data-i18n-placeholder="placeholderUsername" placeholder="USERNAME">
+              </div>
+              <div class="w-full">
+                <input type="password" id="input-reg-pass" class="w-full bg-[#050811] border border-slate-800/90 rounded-2xl px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition-all text-left leading-none" data-i18n-placeholder="placeholderPassword" placeholder="PASSWORD">
+              </div>
+              <div class="w-full">
+                <input type="password" id="input-reg-confirm" class="w-full bg-[#050811] border border-slate-800/90 rounded-2xl px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition-all text-left leading-none" data-i18n-placeholder="placeholderConfirmPassword" placeholder="CONFIRM PASSWORD">
+              </div>
+            </form>
+          </div>
+
         </div>
+
+        <!-- SPACER -->
+        <div class="flex-1"></div>
+
+        <!-- BOTTOM: Alert + Submit Button + Can't Sign In -->
+        <div class="w-full flex flex-col items-center gap-4 mb-2">
+
+          <!-- Alert Notification (frameless / no border) -->
+          <div id="auth-alert" class="hidden w-full px-4 py-1.5 text-rose-400 text-xs font-semibold text-center leading-relaxed">
+            <span id="auth-alert-text"></span>
+          </div>
+
+          <!-- Submit Button (login) -->
+          <div id="btn-login-wrap" class="flex justify-center">
+            <button id="btn-login-submit" type="button" class="w-14 h-14 rounded-2xl custom-accent-bg custom-accent-glow hover:opacity-90 transition-all flex items-center justify-center text-white shadow-xl">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </button>
+          </div>
+
+          <!-- Submit Button (register) -->
+          <div id="btn-register-wrap" class="flex justify-center hidden">
+            <button id="btn-register-submit" type="button" class="w-14 h-14 rounded-2xl custom-accent-bg custom-accent-glow hover:opacity-90 transition-all flex items-center justify-center text-white shadow-xl">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </button>
+          </div>
+
+          <!-- Can't Sign In / Toggle -->
+          <div class="mt-2">
+            <button id="toggle-to-register" class="text-xs font-bold tracking-wider text-slate-400 hover:text-white transition-colors uppercase" data-i18n="cantSignInOrCreate">
+              CAN'T SIGN IN? / CREATE ACCOUNT
+            </button>
+            <button id="toggle-to-login" class="text-xs font-bold tracking-wider text-slate-400 hover:text-white transition-colors uppercase hidden" data-i18n="alreadyHaveAccountSignIn">
+              ALREADY HAVE AN ACCOUNT? SIGN IN
+            </button>
+          </div>
+
+        </div>
+
       </div>
+
     </aside>
 
-    <main class="main-content">
-      <header class="hero">
-        <div class="hero-content">
-          <h1>Minecraft Launcher</h1>
-          <p>Clean cross-platform Electron Launcher template ready for custom build.</p>
-          <div class="actions">
-            <button class="btn-play">PLAY</button>
+    <!-- 2/3 RIGHT CONTENT DISPLAY AREA (BACKGROUND IMAGE & VIEWS) -->
+    <main class="flex-1 h-full relative overflow-hidden flex flex-col z-10">
+      
+      <!-- Content Area Overlay Panels -->
+      <div class="relative z-10 p-8 flex-1 overflow-y-auto flex flex-col justify-between">
+        
+        <!-- Updater Status Bar -->
+        <div id="updater-status-banner" class="hidden w-full mb-4 p-3 rounded-xl border bg-purple-500/10 border-purple-500/30 text-purple-300 text-xs flex flex-col gap-2 backdrop-blur">
+          <div class="flex items-center justify-between">
+            <span id="updater-status-text">Checking for updates...</span>
+            <button id="btn-check-update" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded font-medium transition-colors">Check Update</button>
+          </div>
+          <div id="updater-progress-container" class="hidden w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
+            <div id="updater-progress-bar" class="custom-accent-bg h-1.5 rounded-full w-0 transition-all duration-300"></div>
           </div>
         </div>
-      </header>
 
-      <section class="news-section">
-        <h2>Latest News</h2>
-        <div class="card-grid">
-          <div class="card">
-            <h3>Launcher Ready</h3>
-            <p>GitHub Actions cross-platform build configuration enabled for Windows, macOS, and Linux.</p>
+        <!-- VIEW 1: AUTH SUMMARY (Right Side Preview during Auth) -->
+        <div id="view-auth" class="view-panel flex-1 flex flex-col justify-end">
+        </div>
+
+        <!-- VIEW 2: HOME VIEW (Dashboard) -->
+        <div id="view-home" class="view-panel hidden flex-1 flex flex-col justify-between">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h2 id="home-username" class="text-2xl font-black text-white" data-i18n="welcomeUser">Welcome Player!</h2>
+              <div class="flex items-center gap-2">
+                <button id="btn-open-settings" data-target-view="view-setting" class="px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 border border-slate-700/60">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  <span data-i18n="navSetting">Settings</span>
+                </button>
+                <button id="btn-logout" class="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 rounded-xl text-xs font-semibold transition-colors" data-i18n="logout">Sign Out</button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 pt-4">
+              <div class="bg-slate-950/70 border border-slate-800/80 backdrop-blur rounded-2xl p-4 space-y-2">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="serverStatus">Server Status</span>
+                <div class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span data-i18n="online">Online</span>
+                </div>
+                <p class="text-xs text-slate-400"><span data-i18n="playersOnline">Players</span>: <strong class="text-slate-200">128 / 200</strong></p>
+              </div>
+
+              <div class="bg-slate-950/70 border border-slate-800/80 backdrop-blur rounded-2xl p-4 space-y-2">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="latestNews">Latest News</span>
+                <p class="text-xs text-slate-300 line-clamp-2">Season 5 Patch Notes & New Dungeon Update released today!</p>
+              </div>
+            </div>
           </div>
-          <div class="card">
-            <h3>Version 1.0.0</h3>
-            <p>Pushing a tag will automatically create release binaries for all 3 OS platforms.</p>
+
+          <div class="flex justify-end pt-6">
+            <button class="px-10 py-4 custom-accent-bg custom-accent-glow hover:opacity-90 text-white font-black text-lg rounded-2xl shadow-2xl transition-all transform hover:-translate-y-0.5 flex items-center gap-3">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              <span data-i18n="playNow">PLAY NOW</span>
+            </button>
           </div>
         </div>
-      </section>
+
+        <!-- VIEW 3: SETTINGS VIEW (Only Language Selector) -->
+        <div id="view-setting" class="view-panel hidden flex-1 flex flex-col justify-start">
+          <div class="bg-slate-950/85 border border-slate-800/90 rounded-2xl p-6 shadow-2xl backdrop-blur max-w-lg space-y-4">
+            <div>
+              <h2 class="text-lg font-bold text-white" data-i18n="settingTitle">Launcher Configuration</h2>
+              <p class="text-xs text-slate-400" data-i18n="settingSubtitle">Manage language and client options</p>
+            </div>
+
+            <div id="settings-alert" class="hidden p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs">
+              <span data-i18n="settingsSavedMessage">Settings updated successfully!</span>
+            </div>
+
+            <form id="form-settings" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1" data-i18n="labelLanguage">Interface Language</label>
+                <select id="setting-language" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none">
+                  <option value="en">English (Base)</option>
+                  <option value="th">ไทย (Thai)</option>
+                </select>
+              </div>
+
+              <div class="flex gap-3 pt-2">
+                <button type="submit" class="px-5 py-2 custom-accent-bg hover:opacity-90 text-white font-semibold rounded-xl text-xs shadow-lg transition-all" data-i18n="btnSaveSettings">Save Settings</button>
+                <button type="button" data-target-view="view-home" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition-colors">Back to Home</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </div>
     </main>
+
   </div>
+
+  <!-- Load Scripts -->
+  <script src="src/i18n/translations.js"></script>
+  <script src="src/config/appConfig.js"></script>
+  <script src="src/app.js"></script>
 </body>
 </html>

@@ -1,58 +1,126 @@
-const { app, BrowserWindow, dialog } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
-const path = require('path');
 
-// ปิด log ที่ไม่จำเป็น (เปิดเป็น true เพื่อ debug)
-autoUpdater.logger = null;
+// ตั้งค่า AutoUpdater ให้ดาวน์โหลดอัตโนมัติทันทีที่เจออัปเดต
+autoUpdater.autoDownload = true;
+autoUpdater.autoInstallOnAppQuit = true;
+autoUpdater.logger = require('electron-log');
+if (autoUpdater.logger) {
+  autoUpdater.logger.transports.file.level = 'info';
+}
+
+// ปิด GPU Cache warning log บน Windows
+app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
+
+let mainWindow = null;
 
 function createWindow() {
-  const win = new BrowserWindow({
-    width: 900,
+  mainWindow = new BrowserWindow({
+    width: 960,
     height: 600,
-    minWidth: 800,
-    minHeight: 550,
-    titleBarStyle: 'hidden',
-    titleBarOverlay: {
-      color: '#0f172a',
-      symbolColor: '#f8fafc'
-    },
+    resizable: false,
+    maximizable: false,
+    frame: false,
+    transparent: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
     }
   });
 
-  win.loadFile('index.html');
+  mainWindow.loadFile('index.html');
 
-  // ตรวจสอบ update หลังหน้าต่างโหลดเสร็จ
-  win.webContents.on('did-finish-load', () => {
-    autoUpdater.checkForUpdatesAndNotify();
-  });
-
-  // มี version ใหม่ให้ดาวน์โหลด
-  autoUpdater.on('update-available', () => {
-    dialog.showMessageBox(win, {
-      type: 'info',
-      title: 'มีอัปเดตใหม่',
-      message: 'มีเวอร์ชันใหม่ กำลังดาวน์โหลดในเบื้องหลัง...',
-      buttons: ['ตกลง']
-    });
-  });
-
-  // ดาวน์โหลดเสร็จ พร้อมติดตั้ง
-  autoUpdater.on('update-downloaded', () => {
-    dialog.showMessageBox(win, {
-      type: 'info',
-      title: 'อัปเดตพร้อมแล้ว',
-      message: 'ดาวน์โหลดเสร็จแล้ว กด "รีสตาร์ท" เพื่อติดตั้งเวอร์ชันใหม่',
-      buttons: ['รีสตาร์ทเดี๋ยวนี้', 'ภายหลัง']
-    }).then((result) => {
-      if (result.response === 0) {
-        autoUpdater.quitAndInstall();
-      }
-    });
+  // ตรวจสอบอัปเดตทันทีเมื่อเปิดแอป (เฉพาะในโหมดที่ build แล้ว หรือฉบับใช้งานจริง)
+  mainWindow.webContents.on('did-finish-load', () => {
+    if (app.isPackaged) {
+      autoUpdater.checkForUpdates();
+    } else {
+      console.log('Development mode: Skipping autoUpdater check');
+    }
   });
 }
+
+// ----------------------------------------------------
+// ระบบ Auto Updater Events & IPC Handling
+// ----------------------------------------------------
+autoUpdater.on('checking-for-update', () => {
+  if (mainWindow) mainWindow.webContents.send('updater-message', { status: 'checking', message: 'Checking for updates...' });
+});
+
+autoUpdater.on('update-available', (info) => {
+  if (mainWindow) {
+    mainWindow.webContents.send('updater-message', {
+      status: 'available',
+      message: `Found new update v${info.version}! Downloading...`,
+      version: info.version
+    });
+  }
+});
+
+autoUpdater.on('update-not-available', (info) => {
+  if (mainWindow) {
+    mainWindow.webContents.send('updater-message', { status: 'not-available', message: 'Launcher is up to date.' });
+  }
+});
+
+autoUpdater.on('download-progress', (progressObj) => {
+  if (mainWindow) {
+    mainWindow.webContents.send('updater-progress', {
+      percent: Math.round(progressObj.percent),
+      bytesPerSecond: progressObj.bytesPerSecond,
+      transferred: progressObj.transferred,
+      total: progressObj.total
+    });
+  }
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+  if (mainWindow) {
+    mainWindow.webContents.send('updater-message', {
+      status: 'downloaded',
+      message: `Update v${info.version} downloaded! Restarting to install...`,
+      version: info.version
+    });
+
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'อัปเดตพร้อมแล้ว (Update Ready)',
+      message: `ดาวน์โหลดเวอร์ชัน ${info.version} เรียบร้อยแล้ว แอปจะรีสตาร์ทเพื่อติดตั้งทันที`,
+      buttons: ['รีสตาร์ทเพื่ออัปเดตตอนนี้ (Restart Now)']
+    }).then(() => {
+      autoUpdater.quitAndInstall();
+    });
+  }
+});
+
+autoUpdater.on('error', (err) => {
+  if (mainWindow) {
+    mainWindow.webContents.send('updater-message', { status: 'error', message: err ? err.message : 'Update error' });
+  }
+});
+
+// IPC Listener ให้ Renderer สามารถกดเช็คอัปเดตเองได้แบบ Manual
+ipcMain.on('check-for-update-manual', () => {
+  if (app.isPackaged) {
+    autoUpdater.checkForUpdates();
+  } else {
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'Dev Mode',
+      message: 'การเช็คอัปเดตอัตโนมัติจะทำงานเมื่อส่งออก Build (.exe / NSIS) เท่านั้น',
+      buttons: ['ตกลง']
+    });
+  }
+});
+
+
+ipcMain.on('window-minimize', () => {
+  if (mainWindow) mainWindow.minimize();
+});
+
+ipcMain.on('window-close', () => {
+  if (mainWindow) mainWindow.close();
+});
 
 app.whenReady().then(() => {
   createWindow();
