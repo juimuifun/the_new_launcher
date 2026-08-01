@@ -35,23 +35,10 @@
       "assets/**/*"
     ],
     "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": ["x64"]
-        },
-        {
-          "target": "portable",
-          "arch": ["x64"]
-        }
-      ],
-      "artifactName": "${productName}-${version}-win-${target}-${arch}.${ext}"
+      "target": ["nsis"]
     },
     "mac": {
-      "target": [
-        "dmg",
-        "zip"
-      ]
+      "target": ["dmg"]
     },
     "linux": {
       "maintainer": "developer@example.com",
