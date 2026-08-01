@@ -12,7 +12,10 @@
     "launcher",
     "electron"
   ],
-  "author": "",
+  "author": {
+    "name": "juimuifun",
+    "email": "developer@example.com"
+  },
   "license": "MIT",
   "devDependencies": {
     "electron": "^31.2.0",
@@ -21,6 +24,7 @@
   "build": {
     "appId": "com.launcher.thenewlauncher",
     "productName": "The New Launcher",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
     "directories": {
       "output": "dist"
     },
@@ -43,6 +47,7 @@
       ]
     },
     "linux": {
+      "maintainer": "developer@example.com",
       "target": [
         "AppImage",
         "deb"
