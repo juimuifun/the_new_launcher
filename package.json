@@ -25,6 +25,10 @@
     "appId": "com.launcher.thenewlauncher",
     "productName": "The New Launcher",
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "publish": {
+      "provider": "github",
+      "releaseType": "release"
+    },
     "directories": {
       "output": "dist"
     },
