@@ -760,7 +760,10 @@ class AppUI {
           }
           if (iconOnline) iconOnline.classList.remove('hidden');
           if (iconOffline) iconOffline.classList.add('hidden');
-          if (playerCountEl) playerCountEl.innerText = `${data.players || 0}`;
+          if (playerCountEl) {
+            playerCountEl.innerText = `${data.players || 0}`;
+            playerCountEl.className = 'text-base font-bold text-white font-nexon leading-tight';
+          }
           if (playerLabelEl) playerLabelEl.innerText = i18n.t('labelOnlinePlayers');
           if (cardPlayerCountEl) cardPlayerCountEl.innerText = `${data.players || 0} / ${data.maxPlayers || 200}`;
         } else {
