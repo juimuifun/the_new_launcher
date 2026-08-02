@@ -8,6 +8,8 @@
   <style>
     :root {
       --primary-color: #8b5cf6;
+      --font-heading: 'NexonFootballGothic', sans-serif;
+      --font-body: 'EkkamaiVibe', sans-serif;
     }
     .custom-accent-bg {
       background-color: var(--primary-color) !important;
@@ -15,8 +17,26 @@
     .custom-accent-text {
       color: var(--primary-color) !important;
     }
-    .custom-accent-glow {
-      box-shadow: 0 10px 30px -5px var(--primary-color);
+    .custom-accent-focus {
+      outline: none !important;
+      transition: border-color 0.15s ease-in-out;
+    }
+    .custom-accent-focus:focus, .custom-accent-focus:focus-visible {
+      border-color: var(--primary-color) !important;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+    .custom-accent-checkbox {
+      accent-color: var(--primary-color) !important;
+    }
+    .font-nexon, .font-heading {
+      font-family: var(--font-heading) !important;
+    }
+    .font-ekkamaivibe, .font-body {
+      font-family: var(--font-body) !important;
+    }
+    .font-sans {
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     }
   </style>
 </head>
@@ -48,56 +68,51 @@
       </button>
     </div>
 
-    <!-- 1/3 SIDEBAR CONTAINER (Centered Content, No Header/Footer text) -->
-    <aside class="w-1/3 min-w-[320px] max-w-[340px] bg-[#0c101c]/80 backdrop-blur-md px-8 pt-8 pb-8 flex flex-col z-20 h-full relative">
+    <!-- 1/3 SIDEBAR CONTAINER -->
+    <aside id="main-sidebar" class="w-1/3 min-w-[320px] max-w-[340px] bg-[#0c101c]/80 backdrop-blur-md px-8 pt-8 pb-8 flex flex-col z-20 h-full relative transition-all duration-300">
       
       <!-- Draggable Area at top of sidebar -->
       <div class="drag absolute top-0 left-0 right-0 h-10"></div>
 
-      <!-- MAIN AUTH CONTENT CONTAINER (flex-col, space between top and bottom) -->
-      <div class="w-full flex flex-col items-center flex-1">
+      <!-- SIDEBAR CONTENT 1: AUTH FORM (Shown when logged out) -->
+      <div id="sidebar-auth-content" class="w-full flex flex-col items-center flex-1">
         
         <!-- TOP: Logo + Title + Form Fields -->
         <div class="w-full flex flex-col items-center text-center mt-10">
 
           <!-- Logo Badge / Icon -->
-          <div id="logo-container" class="w-16 h-16 rounded-2xl custom-accent-bg custom-accent-glow flex items-center justify-center text-white font-black text-2xl tracking-wider shadow-lg overflow-hidden">
+          <div id="logo-container" class="w-16 h-16 rounded-2xl custom-accent-bg flex items-center justify-center text-white font-black text-2xl tracking-wider shadow-md overflow-hidden">
             <span id="logo-text">JF</span>
             <img id="logo-img" class="w-full h-full object-cover hidden" alt="Logo">
           </div>
 
           <!-- LOGIN FORM -->
           <div id="form-login-container" class="w-full flex flex-col items-center mt-3">
-            <h2 class="text-2xl font-black text-white tracking-tight mb-5" data-i18n="welcomeTitle">Sign in</h2>
+            <h2 class="text-2xl font-black text-white tracking-tight mb-5 font-nexon" data-i18n="welcomeTitle">Log in</h2>
 
-            <form id="form-login" class="w-full flex flex-col items-center gap-3">
+            <form id="form-login" class="w-full flex flex-col items-center gap-3.5">
               <div class="w-full">
-                <input type="text" id="input-login-user" class="w-full bg-[#050811] border border-slate-800/90 rounded-2xl px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition-all text-left leading-none" data-i18n-placeholder="placeholderUsername" placeholder="USERNAME">
+                <input type="text" id="input-login-user" class="w-full bg-[#050811]/90 border border-slate-800/80 rounded-xl px-4 py-3 text-sm font-medium tracking-wide text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-0 focus-visible:outline-none custom-accent-focus transition-colors duration-150 text-left font-sans" data-i18n-placeholder="placeholderUsername" placeholder="USERNAME">
               </div>
               <div class="w-full">
-                <input type="password" id="input-login-pass" class="w-full bg-[#050811] border border-slate-800/90 rounded-2xl px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition-all text-left leading-none" data-i18n-placeholder="placeholderPassword" placeholder="PASSWORD">
-              </div>
-
-              <div class="w-full flex items-center justify-start gap-2.5 pt-0.5 px-1">
-                <input type="checkbox" id="stay-signed-in" checked class="w-4.5 h-4.5 rounded bg-slate-900 border-slate-800 text-purple-600 focus:ring-0 focus:ring-offset-0 accent-purple-600 cursor-pointer">
-                <label for="stay-signed-in" class="text-sm text-slate-300 font-bold cursor-pointer" data-i18n="staySignedIn">Stay signed in</label>
+                <input type="password" id="input-login-pass" class="w-full bg-[#050811]/90 border border-slate-800/80 rounded-xl px-4 py-3 text-sm font-medium tracking-wide text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-0 focus-visible:outline-none custom-accent-focus transition-colors duration-150 text-left font-sans" data-i18n-placeholder="placeholderPassword" placeholder="PASSWORD">
               </div>
             </form>
           </div>
 
           <!-- REGISTER FORM -->
           <div id="form-register-container" class="w-full flex flex-col items-center mt-3 hidden">
-            <h2 class="text-2xl font-black text-white tracking-tight mb-5" data-i18n="createTitle">Create account</h2>
+            <h2 class="text-2xl font-black text-white tracking-tight mb-5 font-nexon" data-i18n="createTitle">Create account</h2>
 
-            <form id="form-register" class="w-full flex flex-col items-center gap-3">
+            <form id="form-register" class="w-full flex flex-col items-center gap-3.5">
               <div class="w-full">
-                <input type="text" id="input-reg-user" class="w-full bg-[#050811] border border-slate-800/90 rounded-2xl px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition-all text-left leading-none" data-i18n-placeholder="placeholderUsername" placeholder="USERNAME">
+                <input type="text" id="input-reg-user" class="w-full bg-[#050811]/90 border border-slate-800/80 rounded-xl px-4 py-3 text-sm font-medium tracking-wide text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-0 focus-visible:outline-none custom-accent-focus transition-colors duration-150 text-left font-sans" data-i18n-placeholder="placeholderUsername" placeholder="USERNAME">
               </div>
               <div class="w-full">
-                <input type="password" id="input-reg-pass" class="w-full bg-[#050811] border border-slate-800/90 rounded-2xl px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition-all text-left leading-none" data-i18n-placeholder="placeholderPassword" placeholder="PASSWORD">
+                <input type="password" id="input-reg-pass" class="w-full bg-[#050811]/90 border border-slate-800/80 rounded-xl px-4 py-3 text-sm font-medium tracking-wide text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-0 focus-visible:outline-none custom-accent-focus transition-colors duration-150 text-left font-sans" data-i18n-placeholder="placeholderPassword" placeholder="PASSWORD">
               </div>
               <div class="w-full">
-                <input type="password" id="input-reg-confirm" class="w-full bg-[#050811] border border-slate-800/90 rounded-2xl px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500 transition-all text-left leading-none" data-i18n-placeholder="placeholderConfirmPassword" placeholder="CONFIRM PASSWORD">
+                <input type="password" id="input-reg-confirm" class="w-full bg-[#050811]/90 border border-slate-800/80 rounded-xl px-4 py-3 text-sm font-medium tracking-wide text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-0 focus-visible:outline-none custom-accent-focus transition-colors duration-150 text-left font-sans" data-i18n-placeholder="placeholderConfirmPassword" placeholder="CONFIRM PASSWORD">
               </div>
             </form>
           </div>
@@ -111,34 +126,80 @@
         <div class="w-full flex flex-col items-center gap-4 mb-2">
 
           <!-- Alert Notification (frameless / no border) -->
-          <div id="auth-alert" class="hidden w-full px-4 py-1.5 text-rose-400 text-xs font-semibold text-center leading-relaxed">
+          <div id="auth-alert" class="hidden w-full px-4 py-1.5 text-rose-400 text-xs font-semibold text-center leading-relaxed font-ekkamaivibe">
             <span id="auth-alert-text"></span>
           </div>
 
           <!-- Submit Button (login) -->
           <div id="btn-login-wrap" class="flex justify-center">
-            <button id="btn-login-submit" type="button" class="w-14 h-14 rounded-2xl custom-accent-bg custom-accent-glow hover:opacity-90 transition-all flex items-center justify-center text-white shadow-xl">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            <button id="btn-login-submit" type="button" class="w-14 h-14 rounded-2xl custom-accent-bg hover:opacity-90 transition-all flex items-center justify-center text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+              <svg id="btn-login-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              <svg id="btn-login-spinner" class="w-6 h-6 animate-spin hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
             </button>
           </div>
 
           <!-- Submit Button (register) -->
           <div id="btn-register-wrap" class="flex justify-center hidden">
-            <button id="btn-register-submit" type="button" class="w-14 h-14 rounded-2xl custom-accent-bg custom-accent-glow hover:opacity-90 transition-all flex items-center justify-center text-white shadow-xl">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            <button id="btn-register-submit" type="button" class="w-14 h-14 rounded-2xl custom-accent-bg hover:opacity-90 transition-all flex items-center justify-center text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+              <svg id="btn-register-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              <svg id="btn-register-spinner" class="w-6 h-6 animate-spin hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
             </button>
           </div>
 
           <!-- Can't Sign In / Toggle -->
           <div class="mt-2">
-            <button id="toggle-to-register" class="text-xs font-bold tracking-wider text-slate-400 hover:text-white transition-colors uppercase" data-i18n="cantSignInOrCreate">
-              CAN'T SIGN IN? / CREATE ACCOUNT
+            <button id="toggle-to-register" class="text-xs font-bold tracking-wider text-slate-400 hover:text-white transition-colors uppercase font-nexon" data-i18n="cantSignInOrCreate">
+              CAN'T LOG IN? / CREATE ACCOUNT
             </button>
-            <button id="toggle-to-login" class="text-xs font-bold tracking-wider text-slate-400 hover:text-white transition-colors uppercase hidden" data-i18n="alreadyHaveAccountSignIn">
-              ALREADY HAVE AN ACCOUNT? SIGN IN
+            <button id="toggle-to-login" class="text-xs font-bold tracking-wider text-slate-400 hover:text-white transition-colors uppercase font-nexon hidden" data-i18n="alreadyHaveAccountSignIn">
+              ALREADY HAVE AN ACCOUNT? LOG IN
             </button>
           </div>
 
+        </div>
+
+      </div>
+
+      <!-- SIDEBAR CONTENT 2: LOGGED-IN NAVIGATION (Shown when logged in) -->
+      <div id="sidebar-app-content" class="w-full flex flex-col items-center flex-1 hidden">
+        
+        <!-- TOP: Logo Badge (Same as Auth) -->
+        <div class="mt-6 flex flex-col items-center">
+          <div id="app-logo-container" class="w-12 h-12 rounded-2xl custom-accent-bg flex items-center justify-center text-white font-black text-xl tracking-wider shadow-md overflow-hidden">
+            <span id="app-logo-text">JF</span>
+            <img id="app-logo-img" class="w-full h-full object-cover hidden" alt="Logo">
+          </div>
+        </div>
+
+        <!-- CENTER NAVIGATION BUTTONS -->
+        <div class="flex-1 flex flex-col items-center justify-center gap-4 w-full">
+          <!-- 1. Home Button (Main Launch Screen) -->
+          <button data-target-view="view-home" title="Home" class="nav-btn-item w-12 h-12 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white transition-all flex items-center justify-center border border-slate-800/60 shadow-md group">
+            <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          </button>
+
+          <!-- 2. Forum Button -->
+          <button data-target-view="view-forum" title="Forum" class="nav-btn-item w-12 h-12 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white transition-all flex items-center justify-center border border-slate-800/60 shadow-md group">
+            <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/></svg>
+          </button>
+
+          <!-- 3. Store Button -->
+          <button data-target-view="view-store" title="Store" class="nav-btn-item w-12 h-12 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white transition-all flex items-center justify-center border border-slate-800/60 shadow-md group">
+            <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          </button>
+        </div>
+
+        <!-- BOTTOM BUTTONS: Settings & Logout -->
+        <div class="flex flex-col items-center gap-3 w-full mb-2">
+          <!-- Settings Button -->
+          <button data-target-view="view-setting" title="Settings" class="nav-btn-item w-12 h-12 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white transition-all flex items-center justify-center border border-slate-800/60 shadow-md group">
+            <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </button>
+
+          <!-- Logout Button (Left Arrow Icon) -->
+          <button id="btn-logout" title="Sign Out" class="w-12 h-12 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-all flex items-center justify-center border border-rose-500/30 shadow-md group">
+            <svg class="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          </button>
         </div>
 
       </div>
@@ -155,7 +216,6 @@
         <div id="updater-status-banner" class="hidden w-full mb-4 p-3 rounded-xl border bg-purple-500/10 border-purple-500/30 text-purple-300 text-xs flex flex-col gap-2 backdrop-blur">
           <div class="flex items-center justify-between">
             <span id="updater-status-text">Checking for updates...</span>
-            <button id="btn-check-update" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded font-medium transition-colors">Check Update</button>
           </div>
           <div id="updater-progress-container" class="hidden w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
             <div id="updater-progress-bar" class="custom-accent-bg h-1.5 rounded-full w-0 transition-all duration-300"></div>
@@ -168,67 +228,122 @@
 
         <!-- VIEW 2: HOME VIEW (Dashboard) -->
         <div id="view-home" class="view-panel hidden flex-1 flex flex-col justify-between">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <h2 id="home-username" class="text-2xl font-black text-white" data-i18n="welcomeUser">Welcome Player!</h2>
-              <div class="flex items-center gap-2">
-                <button id="btn-open-settings" data-target-view="view-setting" class="px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 border border-slate-700/60">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                  <span data-i18n="navSetting">Settings</span>
-                </button>
-                <button id="btn-logout" class="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 rounded-xl text-xs font-semibold transition-colors" data-i18n="logout">Sign Out</button>
+          <div class="space-y-6">
+            
+            <!-- TOP BAR: Left Online Player Count | Right User Profile with Avatar -->
+            <div class="w-full flex items-center justify-between pt-4 pb-2">
+              
+              <!-- LEFT: Server Status & Online Player Count -->
+              <div class="flex items-center gap-3.5">
+                <!-- Icon: switches between online (people) and offline (X) -->
+                <div id="server-status-icon" class="w-12 h-12 rounded-2xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-center text-purple-400 shadow-md transition-all duration-300">
+                  <!-- Online icon (default) -->
+                  <svg id="server-icon-online" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                  <!-- Offline icon (hidden by default) -->
+                  <svg id="server-icon-offline" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                </div>
+                <div class="flex flex-col justify-center">
+                  <span id="home-player-count" class="text-base font-bold text-white font-nexon leading-tight">---</span>
+                  <span id="home-player-label" class="text-xs text-slate-400 font-ekkamaivibe leading-tight mt-0.5" data-i18n="labelOnlinePlayers">ผู้เล่นออนไลน์</span>
+                </div>
               </div>
+
+              <!-- RIGHT: User Profile + Avatar (Minecraft Skin Face) -->
+              <div class="flex items-center gap-3.5">
+                <div class="flex flex-col text-right justify-center">
+                  <span id="home-username" class="text-base font-bold text-white font-nexon leading-tight">Player</span>
+                  <span class="text-xs text-slate-400 font-ekkamaivibe leading-tight mt-0.5" data-i18n="labelPlayerRole">ผู้เล่น</span>
+                </div>
+                <div class="w-12 h-12 rounded-2xl custom-accent-bg border border-slate-700/60 flex items-center justify-center text-white font-bold text-sm overflow-hidden shadow-md">
+                  <img id="home-user-avatar" class="w-full h-full object-cover" src="https://mc-heads.net/avatar/steve/64" alt="Avatar">
+                </div>
+              </div>
+
             </div>
 
-            <div class="grid grid-cols-2 gap-4 pt-4">
-              <div class="bg-slate-950/70 border border-slate-800/80 backdrop-blur rounded-2xl p-4 space-y-2">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="serverStatus">Server Status</span>
-                <div class="text-xl font-bold text-emerald-400 flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <span data-i18n="online">Online</span>
-                </div>
-                <p class="text-xs text-slate-400"><span data-i18n="playersOnline">Players</span>: <strong class="text-slate-200">128 / 200</strong></p>
-              </div>
-
-              <div class="bg-slate-950/70 border border-slate-800/80 backdrop-blur rounded-2xl p-4 space-y-2">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="latestNews">Latest News</span>
-                <p class="text-xs text-slate-300 line-clamp-2">Season 5 Patch Notes & New Dungeon Update released today!</p>
-              </div>
+            <!-- SERVER NAME & DESCRIPTION -->
+            <div class="pt-2 pb-1 flex flex-col items-center text-center">
+              <h1 id="home-server-name" class="text-2xl font-black text-white font-nexon leading-tight tracking-wide"></h1>
+              <div id="home-server-description" class="mt-8 space-y-1"></div>
             </div>
           </div>
 
-          <div class="flex justify-end pt-6">
-            <button class="px-10 py-4 custom-accent-bg custom-accent-glow hover:opacity-90 text-white font-black text-lg rounded-2xl shadow-2xl transition-all transform hover:-translate-y-0.5 flex items-center gap-3">
-              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-              <span data-i18n="playNow">PLAY NOW</span>
-            </button>
+          <!-- BOTTOM ACTION BAR: Centered Play Button + Absolute-right Repair Button -->
+          <div class="w-full flex flex-col items-center justify-center relative pt-4 mb-1">
+            
+            <!-- STATUS TEXT LABEL (Displayed Above Play Button) -->
+            <div id="launch-status-text" class="h-6 text-xs text-purple-300/90 font-ekkamaivibe text-center mb-1.5 transition-all truncate max-w-sm"></div>
+
+            <!-- CENTER: PLAY BUTTON WITH INTEGRATED PROGRESS BAR -->
+            <div class="relative w-[340px] max-w-full">
+              <button id="btn-launch-game" type="button" class="w-full h-14 rounded-2xl custom-accent-bg hover:opacity-95 transition-all flex items-center justify-center text-white shadow-xl relative overflow-hidden group">
+                
+                <!-- Inner Progress Bar Fill Layer (0% to 100%) -->
+                <div id="launch-progress-bar" class="absolute inset-y-0 left-0 bg-white/25 w-0 transition-all duration-200 pointer-events-none"></div>
+
+                <!-- Button Content (Icon + Short Label) -->
+                <div class="relative z-10 flex items-center justify-center gap-3">
+                  <!-- Play Arrow Icon -->
+                  <svg id="launch-btn-icon-play" class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  <!-- Loading Spinner Icon (Hidden by default) -->
+                  <svg id="launch-btn-icon-spinner" class="w-5 h-5 animate-spin hidden" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <!-- Short Text Label (Inside Button) -->
+                  <span id="launch-btn-text" class="font-black text-base tracking-wide font-nexon" data-i18n="playNow">เริ่มเกม</span>
+                </div>
+
+              </button>
+            </div>
+
+            <!-- RIGHT: REPAIR BUTTON (absolute, far right) -->
+            <div class="absolute right-0 bottom-0">
+              <button id="btn-repair-launcher" type="button" title="ลบโฟลเดอร์เกมและติดตั้งใหม่" class="w-14 h-14 rounded-2xl bg-slate-900/80 hover:bg-rose-950/70 border border-slate-800/80 hover:border-rose-800/60 text-slate-400 hover:text-rose-400 transition-all duration-200 flex items-center justify-center shadow-lg group">
+                <svg class="w-5 h-5 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              </button>
+            </div>
+
           </div>
         </div>
 
-        <!-- VIEW 3: SETTINGS VIEW (Only Language Selector) -->
+        <!-- VIEW 3: FORUM VIEW -->
+        <div id="view-forum" class="view-panel hidden flex-1 flex flex-col justify-start space-y-4">
+          <div class="bg-slate-950/85 border border-slate-800/90 rounded-2xl p-6 shadow-2xl backdrop-blur max-w-xl space-y-3">
+            <h2 class="text-2xl font-black text-white font-nexon" data-i18n="navForum">Forum</h2>
+            <p class="text-xs text-slate-300 font-ekkamaivibe">Community discussions, announcements, and patch notes.</p>
+          </div>
+        </div>
+
+        <!-- VIEW 4: STORE VIEW -->
+        <div id="view-store" class="view-panel hidden flex-1 flex flex-col justify-start space-y-4">
+          <div class="bg-slate-950/85 border border-slate-800/90 rounded-2xl p-6 shadow-2xl backdrop-blur max-w-xl space-y-3">
+            <h2 class="text-2xl font-black text-white font-nexon" data-i18n="navStore">Store</h2>
+            <p class="text-xs text-slate-300 font-ekkamaivibe">Server ranks, cosmetics, and special items webstore.</p>
+          </div>
+        </div>
+
+        <!-- VIEW 5: SETTINGS VIEW (Only Language Selector) -->
         <div id="view-setting" class="view-panel hidden flex-1 flex flex-col justify-start">
           <div class="bg-slate-950/85 border border-slate-800/90 rounded-2xl p-6 shadow-2xl backdrop-blur max-w-lg space-y-4">
             <div>
-              <h2 class="text-lg font-bold text-white" data-i18n="settingTitle">Launcher Configuration</h2>
-              <p class="text-xs text-slate-400" data-i18n="settingSubtitle">Manage language and client options</p>
+              <h2 class="text-xl font-bold text-white font-nexon" data-i18n="settingTitle">Launcher Configuration</h2>
+              <p class="text-xs text-slate-400 font-ekkamaivibe" data-i18n="settingSubtitle">Manage language and client options</p>
             </div>
 
-            <div id="settings-alert" class="hidden p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs">
+            <div id="settings-alert" class="hidden p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs font-ekkamaivibe">
               <span data-i18n="settingsSavedMessage">Settings updated successfully!</span>
             </div>
 
             <form id="form-settings" class="space-y-4">
               <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1" data-i18n="labelLanguage">Interface Language</label>
-                <select id="setting-language" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none">
+                <label class="block text-xs font-semibold text-slate-300 mb-1 font-nexon" data-i18n="labelLanguage">Interface Language</label>
+                <select id="setting-language" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none font-sans">
                   <option value="en">English (Base)</option>
                   <option value="th">ไทย (Thai)</option>
                 </select>
               </div>
 
               <div class="flex gap-3 pt-2">
-                <button type="submit" class="px-5 py-2 custom-accent-bg hover:opacity-90 text-white font-semibold rounded-xl text-xs shadow-lg transition-all" data-i18n="btnSaveSettings">Save Settings</button>
-                <button type="button" data-target-view="view-home" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition-colors">Back to Home</button>
+                <button type="submit" class="px-5 py-2 custom-accent-bg hover:opacity-90 text-white font-semibold rounded-xl text-xs shadow-lg transition-all font-nexon" data-i18n="btnSaveSettings">Save Settings</button>
+                <button type="button" data-target-view="view-home" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition-colors font-nexon">Back to Home</button>
               </div>
             </form>
           </div>
@@ -237,6 +352,73 @@
       </div>
     </main>
 
+  </div>
+
+  <!-- CUSTOM UPDATE MODAL (Styled to match launcher theme) -->
+  <div id="update-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md transition-all">
+    <div class="w-[420px] bg-[#0c101c] border border-slate-800/80 rounded-3xl p-7 shadow-2xl flex flex-col items-center text-center space-y-5 animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Icon Badge -->
+      <div class="w-14 h-14 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center shadow-inner">
+        <svg class="w-7 h-7 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+      </div>
+
+      <!-- Content -->
+      <div class="space-y-1.5">
+        <h3 class="text-xl font-black text-white tracking-tight" data-i18n="updateReadyTitle">Update Ready</h3>
+        <p class="text-xs text-slate-400 leading-relaxed" id="update-modal-desc">
+          Version <strong id="update-modal-version" class="text-purple-400 font-bold">1.0.0</strong> downloaded. Restart now to install the update.
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3 w-full pt-2">
+        <button id="btn-update-restart" class="flex-1 py-3 px-4 custom-accent-bg hover:opacity-90 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span data-i18n="btnRestartNow">Restart Now</span>
+        </button>
+        <button id="btn-update-later" class="py-3 px-4 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 font-semibold text-xs rounded-2xl transition-colors" data-i18n="btnLater">
+          Later
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- REPAIR CONFIRM MODAL -->
+  <div id="repair-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div class="w-[400px] bg-[#0c101c] border border-slate-800/80 rounded-3xl p-7 shadow-2xl flex flex-col items-center text-center gap-5">
+      
+      <!-- Warning Icon -->
+      <div class="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+      </div>
+
+      <!-- Content -->
+      <div class="space-y-2">
+        <h3 class="text-lg font-black text-white tracking-tight font-nexon">ลบข้อมูลเกม?</h3>
+        <p class="text-xs text-slate-400 leading-relaxed font-ekkamaivibe">
+          ระบบจะลบโฟลเดอร์เกมทั้งหมด<br>
+          <span class="text-rose-400/80 font-bold">(.the_new_launcher)</span><br>
+          และจะต้องดาวน์โหลดใหม่ตั้งแต่ต้น
+        </p>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex gap-3 w-full pt-1">
+        <button id="btn-repair-cancel" class="flex-1 py-3 px-4 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white font-bold text-sm rounded-2xl transition-all font-nexon">
+          ยกเลิก
+        </button>
+        <button id="btn-repair-confirm" class="flex-1 py-3 px-4 bg-rose-600/80 hover:bg-rose-600 border border-rose-500/40 text-white font-black text-sm rounded-2xl shadow-lg transition-all font-nexon">
+          ลบออกเลย
+        </button>
+      </div>
+
+    </div>
   </div>
 
   <!-- Load Scripts -->

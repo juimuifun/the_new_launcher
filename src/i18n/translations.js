@@ -2,15 +2,17 @@ const translations = {
   en: {
     appTitle: "The New Launcher",
     navHome: "Home",
+    navForum: "Forum",
+    navStore: "Store",
     navSetting: "Settings",
     navAuth: "Account",
     logout: "Sign Out",
     
     // Auth Page
-    welcomeTitle: "Sign in",
+    welcomeTitle: "Log in",
     createTitle: "Create account",
     welcomeSubtitle: "Log in to your launcher account to continue",
-    tabLogin: "Sign In",
+    tabLogin: "Log In",
     tabRegister: "Create Account",
     labelUsername: "USERNAME",
     labelEmail: "EMAIL ADDRESS",
@@ -20,11 +22,11 @@ const translations = {
     placeholderEmail: "EMAIL ADDRESS",
     placeholderPassword: "PASSWORD",
     placeholderConfirmPassword: "CONFIRM PASSWORD",
-    btnSubmitLogin: "Sign In",
+    btnSubmitLogin: "Log In",
     btnSubmitRegister: "Register",
-    staySignedIn: "Stay signed in",
-    cantSignInOrCreate: "CAN'T SIGN IN? / CREATE ACCOUNT",
-    alreadyHaveAccountSignIn: "ALREADY HAVE AN ACCOUNT? SIGN IN",
+    staySignedIn: "Stay logged in",
+    cantSignInOrCreate: "CAN'T LOG IN? / CREATE ACCOUNT",
+    alreadyHaveAccountSignIn: "ALREADY HAVE AN ACCOUNT? LOG IN",
     
     // Auth Validation Messages
     errUserPassRequired: "Please enter username and password",
@@ -32,15 +34,20 @@ const translations = {
     errPassRequired: "Please enter password",
     errConfirmRequired: "Please confirm password",
     errPassMismatch: "Passwords do not match",
-    errWrongPass: "Incorrect password",
+    errWrongPass: "Incorrect username or password",
     errUserTaken: "Username \"{name}\" is already taken",
+    errApiConnection: "Unable to connect to Web API Server",
     
     // Home Page
     playNow: "PLAY NOW",
+    btnRepairLauncher: "Repair Launcher & Client",
     serverStatus: "Server Status",
     online: "Online",
     offline: "Offline",
     playersOnline: "Players Online",
+    labelOnlinePlayers: "Online Players",
+    labelServerOffline: "Server Offline",
+    labelPlayerRole: "Player",
     latestNews: "Latest Updates & News",
     welcomeUser: "Welcome, {name}!",
     readyToPlay: "Ready to jump into the adventure?",
@@ -56,10 +63,23 @@ const translations = {
     placeholderApiDomain: "https://api.yourserver.com",
     btnSaveSettings: "Save Settings",
     settingsSavedMessage: "Settings updated successfully!",
+
+    // Update Modal
+    updateReadyTitle: "Update Ready",
+    updateModalDesc: "Version {version} downloaded. Restart now to install update.",
+    btnRestartNow: "Restart Now",
+    btnLater: "Later",
+
+    // Repair Modal
+    repairModalTitle: "System Repair",
+    repairModalDesc: "Checking and repairing launcher & game client files...",
+    btnClose: "OK",
   },
   th: {
     appTitle: "ตัวรันใหม่",
     navHome: "หน้าแรก",
+    navForum: "เว็บบอร์ด",
+    navStore: "ร้านค้า",
     navSetting: "ตั้งค่า",
     navAuth: "บัญชีผู้ใช้",
     logout: "ออกจากระบบ",
@@ -90,15 +110,20 @@ const translations = {
     errPassRequired: "กรุณากรอกรหัสผ่าน",
     errConfirmRequired: "กรุณายืนยันรหัสผ่าน",
     errPassMismatch: "รหัสผ่านไม่ตรงกัน",
-    errWrongPass: "รหัสผ่านไม่ถูกต้อง",
+    errWrongPass: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง",
     errUserTaken: "ชื่อผู้ใช้ \"{name}\" มีผู้ใช้งานแล้ว",
+    errApiConnection: "ไม่สามารถเชื่อมต่อ Web API Server ได้",
     
     // Home Page
-    playNow: "เริ่มเล่นเกม",
+    playNow: "เริ่มเกม",
+    btnRepairLauncher: "ซ่อมแซม Launcher และตัวเกม",
     serverStatus: "สถานะเซิร์ฟเวอร์",
     online: "เปิดใช้งาน",
     offline: "ปิดปรับปรุง",
     playersOnline: "ผู้เล่นออนไลน์",
+    labelOnlinePlayers: "ผู้เล่นออนไลน์",
+    labelServerOffline: "เซิร์ฟปิด",
+    labelPlayerRole: "ผู้เล่น",
     latestNews: "ข่าวสารและอัปเดตล่าสุด",
     welcomeUser: "ยินดีต้อนรับคุณ {name}!",
     readyToPlay: "พร้อมสำหรับการผจญภัยหรือยัง?",
@@ -114,6 +139,17 @@ const translations = {
     placeholderApiDomain: "https://api.yourserver.com",
     btnSaveSettings: "บันทึกการตั้งค่า",
     settingsSavedMessage: "บันทึกการตั้งค่าเรียบร้อยแล้ว!",
+
+    // Update Modal
+    updateReadyTitle: "มีอัปเดตใหม่พร้อมใช้งาน",
+    updateModalDesc: "ดาวน์โหลดเวอร์ชัน {version} เรียบร้อยแล้ว รีสตาร์ทตอนนี้เพื่อทำการติดตั้ง",
+    btnRestartNow: "รีสตาร์ทตอนนี้",
+    btnLater: "ภายหลัง",
+
+    // Repair Modal
+    repairModalTitle: "ซ่อมแซมระบบ",
+    repairModalDesc: "ระบบกำลังทำการตรวจสอบและซ่อมแซมไฟล์เกม / Launcher...",
+    btnClose: "ตกลง",
   }
 };
 
