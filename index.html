@@ -212,16 +212,6 @@
       <!-- Content Area Overlay Panels -->
       <div class="relative z-10 p-8 flex-1 overflow-y-auto flex flex-col justify-between">
         
-        <!-- Updater Status Bar -->
-        <div id="updater-status-banner" class="hidden w-full mb-4 p-3 rounded-xl border bg-purple-500/10 border-purple-500/30 text-purple-300 text-xs flex flex-col gap-2 backdrop-blur">
-          <div class="flex items-center justify-between">
-            <span id="updater-status-text">Checking for updates...</span>
-          </div>
-          <div id="updater-progress-container" class="hidden w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
-            <div id="updater-progress-bar" class="custom-accent-bg h-1.5 rounded-full w-0 transition-all duration-300"></div>
-          </div>
-        </div>
-
         <!-- VIEW 1: AUTH SUMMARY (Right Side Preview during Auth) -->
         <div id="view-auth" class="view-panel flex-1 flex flex-col justify-end">
         </div>
@@ -236,7 +226,7 @@
               <!-- LEFT: Server Status & Online Player Count -->
               <div class="flex items-center gap-3.5">
                 <!-- Icon: switches between online (people) and offline (X) -->
-                <div id="server-status-icon" class="w-12 h-12 rounded-2xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-center text-purple-400 shadow-md transition-all duration-300">
+                <div id="server-status-icon" class="w-12 h-12 rounded-2xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-center custom-accent-text shadow-md transition-all duration-300">
                   <!-- Online icon (default) -->
                   <svg id="server-icon-online" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                   <!-- Offline icon (hidden by default) -->
@@ -272,7 +262,7 @@
           <div class="w-full flex flex-col items-center justify-center relative pt-4 mb-1">
             
             <!-- STATUS TEXT LABEL (Displayed Above Play Button) -->
-            <div id="launch-status-text" class="h-6 text-xs text-purple-300/90 font-ekkamaivibe text-center mb-1.5 transition-all truncate max-w-sm"></div>
+            <div id="launch-status-text" class="h-6 text-xs custom-accent-text font-ekkamaivibe text-center mb-1.5 transition-all truncate max-w-sm"></div>
 
             <!-- CENTER: PLAY BUTTON WITH INTEGRATED PROGRESS BAR -->
             <div class="relative w-[340px] max-w-full">
@@ -354,32 +344,40 @@
 
   </div>
 
-  <!-- CUSTOM UPDATE MODAL (Styled to match launcher theme) -->
+  <!-- CUSTOM UPDATE MODAL (Styled to match launcher dark theme) -->
   <div id="update-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md transition-all">
-    <div class="w-[420px] bg-[#0c101c] border border-slate-800/80 rounded-3xl p-7 shadow-2xl flex flex-col items-center text-center space-y-5 animate-in fade-in zoom-in-95 duration-200">
+    <div class="w-[420px] bg-[#0c101c] border border-slate-800/80 rounded-3xl p-7 shadow-2xl flex flex-col items-center text-center space-y-5">
       
       <!-- Icon Badge -->
-      <div class="w-14 h-14 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center shadow-inner">
-        <svg class="w-7 h-7 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div id="update-modal-icon-badge" class="w-14 h-14 rounded-2xl custom-accent-bg text-white flex items-center justify-center shadow-lg">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
         </svg>
       </div>
 
       <!-- Content -->
-      <div class="space-y-1.5">
-        <h3 class="text-xl font-black text-white tracking-tight" data-i18n="updateReadyTitle">Update Ready</h3>
-        <p class="text-xs text-slate-400 leading-relaxed" id="update-modal-desc">
-          Version <strong id="update-modal-version" class="text-purple-400 font-bold">1.0.0</strong> downloaded. Restart now to install the update.
+      <div class="space-y-2">
+        <h3 id="update-modal-title" class="text-xl font-black text-white tracking-tight font-nexon" data-i18n="updateReadyTitle">Update Ready</h3>
+        <p id="update-modal-desc" class="text-xs text-slate-300 leading-relaxed font-ekkamaivibe">
+          Version <strong id="update-modal-version" class="custom-accent-text font-bold">1.0.0</strong> downloaded. Restart now to install update.
         </p>
       </div>
 
+      <!-- Progress Bar (while downloading) -->
+      <div id="update-modal-progress-wrap" class="hidden w-full space-y-1.5">
+        <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
+          <div id="update-modal-progress-bar" class="custom-accent-bg h-full w-0 transition-all duration-200"></div>
+        </div>
+        <span id="update-modal-progress-text" class="text-[11px] text-slate-400 font-ekkamaivibe">0%</span>
+      </div>
+
       <!-- Action Buttons -->
-      <div class="flex items-center gap-3 w-full pt-2">
+      <div id="update-modal-actions" class="flex items-center gap-3 w-full pt-2 font-nexon">
         <button id="btn-update-restart" class="flex-1 py-3 px-4 custom-accent-bg hover:opacity-90 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
           <span data-i18n="btnRestartNow">Restart Now</span>
         </button>
-        <button id="btn-update-later" class="py-3 px-4 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 font-semibold text-xs rounded-2xl transition-colors" data-i18n="btnLater">
+        <button id="btn-update-later" class="py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-2xl transition-colors" data-i18n="btnLater">
           Later
         </button>
       </div>

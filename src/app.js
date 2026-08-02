@@ -122,64 +122,61 @@ class AppUI {
   initAutoUpdater() {
     if (window.require) {
       const { ipcRenderer } = window.require('electron');
-      const statusBanner = document.getElementById('updater-status-banner');
-      const statusText = document.getElementById('updater-status-text');
-      const progressBar = document.getElementById('updater-progress-bar');
-      const progressContainer = document.getElementById('updater-progress-container');
-
-      ipcRenderer.on('updater-message', (event, data) => {
-        if (statusBanner && statusText) {
-          statusBanner.classList.remove('hidden');
-          statusText.innerText = data.message;
-
-          if (data.status === 'downloaded') {
-            statusBanner.className = 'mb-4 p-3 rounded-xl border bg-emerald-500/10 border-emerald-500/30 text-emerald-400 text-xs flex items-center justify-between';
-          } else if (data.status === 'error') {
-            statusBanner.className = 'mb-4 p-3 rounded-xl border bg-rose-500/10 border-rose-500/30 text-rose-400 text-xs flex items-center justify-between';
-          } else {
-            statusBanner.className = 'mb-4 p-3 rounded-xl border bg-purple-500/10 border-purple-500/30 text-purple-400 text-xs flex items-center justify-between';
-          }
-        }
-      });
-
-      ipcRenderer.on('updater-progress', (event, data) => {
-        if (progressContainer && progressBar) {
-          progressContainer.classList.remove('hidden');
-          progressBar.style.width = `${data.percent}%`;
-        }
-      });
-
-      // Show Custom Update Modal on update downloaded
       const updateModal = document.getElementById('update-modal');
+      const updateTitle = document.getElementById('update-modal-title');
       const updateDesc = document.getElementById('update-modal-desc');
+      const updateProgressWrap = document.getElementById('update-modal-progress-wrap');
+      const updateProgressBar = document.getElementById('update-modal-progress-bar');
+      const updateProgressText = document.getElementById('update-modal-progress-text');
+      const updateActions = document.getElementById('update-modal-actions');
+      const btnRestart = document.getElementById('btn-update-restart');
+      const btnLater = document.getElementById('btn-update-later');
 
+      // Show progress in modal if available
+      ipcRenderer.on('updater-progress', (event, data) => {
+        if (updateModal && !updateModal.classList.contains('hidden')) {
+          if (updateProgressWrap) updateProgressWrap.classList.remove('hidden');
+          if (updateProgressBar) updateProgressBar.style.width = `${data.percent}%`;
+          if (updateProgressText) updateProgressText.innerText = `${data.percent}%`;
+        }
+      });
+
+      // Show Custom Update Modal when update downloaded & ready
       ipcRenderer.on('update-ready-modal', (event, data) => {
         if (updateModal) {
+          if (updateTitle) updateTitle.innerText = i18n.t('updateReadyTitle');
           if (updateDesc) {
-            updateDesc.innerText = i18n.t('updateModalDesc', { version: data.version });
+            updateDesc.innerHTML = i18n.t('updateModalDesc', { version: `<strong class="custom-accent-text font-bold">${data.version || ''}</strong>` });
           }
+          if (updateProgressWrap) updateProgressWrap.classList.add('hidden');
+          if (updateActions) updateActions.classList.remove('hidden');
           updateModal.classList.remove('hidden');
         }
       });
 
-      const btnRestart = document.getElementById('btn-update-restart');
+      ipcRenderer.on('updater-message', (event, data) => {
+        if (data.status === 'downloaded') {
+          if (updateModal) {
+            if (updateTitle) updateTitle.innerText = i18n.t('updateReadyTitle');
+            if (updateDesc) {
+              updateDesc.innerHTML = i18n.t('updateModalDesc', { version: `<strong class="custom-accent-text font-bold">${data.version || ''}</strong>` });
+            }
+            if (updateProgressWrap) updateProgressWrap.classList.add('hidden');
+            if (updateActions) updateActions.classList.remove('hidden');
+            updateModal.classList.remove('hidden');
+          }
+        }
+      });
+
       if (btnRestart) {
         btnRestart.addEventListener('click', () => {
           ipcRenderer.send('restart-and-install');
         });
       }
 
-      const btnLater = document.getElementById('btn-update-later');
       if (btnLater) {
         btnLater.addEventListener('click', () => {
           if (updateModal) updateModal.classList.add('hidden');
-        });
-      }
-
-      const btnCheckUpdate = document.getElementById('btn-check-update');
-      if (btnCheckUpdate) {
-        btnCheckUpdate.addEventListener('click', () => {
-          ipcRenderer.send('check-for-update-manual');
         });
       }
     }
@@ -580,9 +577,9 @@ class AppUI {
 
       if (data && data.online !== undefined) {
         if (data.online) {
-          // Online: show people icon, purple color
+          // Online: show people icon, accent color
           if (statusIconBox) {
-            statusIconBox.className = 'w-12 h-12 rounded-2xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-center text-purple-400 shadow-md transition-all duration-300';
+            statusIconBox.className = 'w-12 h-12 rounded-2xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-center custom-accent-text shadow-md transition-all duration-300';
           }
           if (iconOnline) iconOnline.classList.remove('hidden');
           if (iconOffline) iconOffline.classList.add('hidden');
