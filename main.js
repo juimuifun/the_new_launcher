@@ -15,6 +15,66 @@ app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
 
 let mainWindow = null;
 
+function normalizeGameConfig(config) {
+  const normalized = {
+    version: config?.version || '1.20.1',
+    loader: String(config?.loader || 'vanilla').toLowerCase(),
+    loaderVersion: String(config?.loaderVersion || '').trim(),
+    serverIp: config?.serverIp || '',
+    serverPort: config?.serverPort || 25565,
+    javaVersion: config?.javaVersion || 17
+  };
+
+  switch (normalized.loader) {
+    case 'forge':
+      if (normalized.loaderVersion && !normalized.loaderVersion.includes('-') && normalized.version && normalized.loaderVersion !== normalized.version) {
+        normalized.loaderVersion = `${normalized.version}-${normalized.loaderVersion}`;
+      }
+      break;
+    case 'neoforge':
+      if (!normalized.loaderVersion || normalized.loaderVersion === normalized.version) {
+        if (normalized.version === '1.21.1') {
+          normalized.loaderVersion = '21.1.235';
+        } else if (normalized.loaderVersion === normalized.version) {
+          normalized.loaderVersion = '';
+        }
+      }
+      break;
+    case 'fabric':
+    case 'quilt':
+      if (!normalized.loaderVersion) {
+        normalized.loaderVersion = normalized.version;
+      }
+      break;
+    case 'vanilla':
+    default:
+      normalized.loaderVersion = normalized.version;
+      break;
+  }
+
+  return normalized;
+}
+
+function getLauncherLoaderConfig(gameConfig) {
+  const loader = String(gameConfig?.loader || 'vanilla').toLowerCase();
+  const version = String(gameConfig?.version || 'latest_release').trim();
+  const loaderVersion = String(gameConfig?.loaderVersion || '').trim();
+
+  switch (loader) {
+    case 'forge':
+      return { loader: 'forge', version: loaderVersion || version };
+    case 'neoforge':
+      return { loader: 'neoforge', version: loaderVersion || version };
+    case 'fabric':
+      return { loader: 'fabric', version: loaderVersion || version };
+    case 'quilt':
+      return { loader: 'quilt', version: loaderVersion || version };
+    case 'vanilla':
+    default:
+      return { loader: 'vanilla', version };
+  }
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 960,
@@ -254,14 +314,14 @@ ipcMain.on('launch-game', async (event, userPayload) => {
     saveAuthXCheckConfig(userPayload.username || 'Player', freshAccessToken, folderNamespace);
 
     // Step 1: Fetch Game Config from Web Server API
-    let gameConfig = {
+    let gameConfig = normalizeGameConfig({
       version: '1.20.1',
       loader: 'vanilla',
       loaderVersion: '',
       serverIp: '',
       serverPort: 25565,
       javaVersion: 17
-    };
+    });
 
     try {
       console.log(`[Launcher] Fetching game config from: ${apiDomain}/minecraft/api/launcher-config`);
@@ -269,14 +329,15 @@ ipcMain.on('launch-game', async (event, userPayload) => {
       if (configRes && configRes.ok) {
         const resData = await configRes.json().catch(() => ({}));
         if (resData && resData.game) {
-          gameConfig.version = resData.game.version || gameConfig.version;
-          gameConfig.loader = resData.game.loader || gameConfig.loader;
-          gameConfig.loaderVersion = resData.game.loaderVersion || '';
-          gameConfig.serverIp = resData.game.serverIp || '';
-          gameConfig.serverPort = resData.game.serverPort || 25565;
-          if (resData.java && resData.java.version) {
-            gameConfig.javaVersion = resData.java.version;
-          }
+          gameConfig = normalizeGameConfig({
+            ...gameConfig,
+            version: resData.game.version || gameConfig.version,
+            loader: resData.game.loader || gameConfig.loader,
+            loaderVersion: resData.game.loaderVersion || '',
+            serverIp: resData.game.serverIp || '',
+            serverPort: resData.game.serverPort || 25565,
+            javaVersion: resData.java && resData.java.version ? resData.java.version : gameConfig.javaVersion
+          });
           console.log('[Launcher] Successfully loaded config from Web Server:', gameConfig);
         }
       } else {
@@ -363,6 +424,9 @@ ipcMain.on('launch-game', async (event, userPayload) => {
       'optionsof.txt'
     ];
 
+    const launcherLoader = getLauncherLoaderConfig(gameConfig);
+    logMessage(`[System] Loader config: ${JSON.stringify(launcherLoader)}`);
+
     const launcher = new Launcher({
       serverId: folderNamespace,
       cleaning: {
@@ -371,10 +435,7 @@ ipcMain.on('launch-game', async (event, userPayload) => {
       },
       minecraft: {
         version: gameConfig.version,
-        loader: {
-          loader: gameConfig.loader || 'vanilla',
-          version: gameConfig.loaderVersion || gameConfig.version
-        }
+        loader: launcherLoader
       },
       account: authSession,
       memory: {
