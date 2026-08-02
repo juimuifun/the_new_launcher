@@ -303,11 +303,9 @@ ipcMain.on('launch-game', async (event, userPayload) => {
       sendProgress('extra-downloading', p, `Syncing Server Files (${downloadProgress}%)`);
     });
 
-    // Setup File Logger inside Project Directory
-    const logsDir = path.join(__dirname, 'logs');
-    if (!fs.existsSync(logsDir)) {
-      fs.mkdirSync(logsDir, { recursive: true });
-    }
+    // Setup File Logger inside User Data Directory
+    const logsDir = path.join(app.getPath('userData'), 'logs');
+    ensureDirSafe(logsDir);
     const logFilePath = path.join(logsDir, 'launcher_game.log');
 
     // เคลียร์ Log เก่า ล้างไฟล์เริ่มต้นใหม่ทุกครั้งที่กดเริ่มเกม
