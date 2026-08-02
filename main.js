@@ -1,5 +1,6 @@
 const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
+const fs = require('fs');
 
 // ตั้งค่า AutoUpdater ให้ดาวน์โหลดอัตโนมัติทันทีที่เจออัปเดต
 autoUpdater.autoDownload = true;
@@ -126,6 +127,17 @@ ipcMain.on('launch-game', async (event, userPayload) => {
     // ตำแหน่งโฟลเดอร์เก็บไฟล์เกมตามมาตรฐาน Minecraft (%APPDATA%\.namespace)
     const rootPath = path.join(app.getPath('appData'), `.${folderNamespace}`);
 
+    // ป้องกันปัญหา ENOTDIR โดยการการันตีว่า rootPath เป็นไดเรกทอรีเสมอ
+    if (fs.existsSync(rootPath)) {
+      const rootStat = fs.statSync(rootPath);
+      if (!rootStat.isDirectory()) {
+        fs.unlinkSync(rootPath);
+        fs.mkdirSync(rootPath, { recursive: true });
+      }
+    } else {
+      fs.mkdirSync(rootPath, { recursive: true });
+    }
+
     // ----------------------------------------------------
     // Monotonic Progress Tracker (เดินหน้าอย่างเดียว การันตี 0% -> 100%)
     // ----------------------------------------------------
@@ -138,6 +150,32 @@ ipcMain.on('launch-game', async (event, userPayload) => {
         mainWindow.webContents.send('launch-progress', { status, percent: currentMaxPercent, text });
       }
     };
+
+    // Step 0: Re-authenticate to get a fresh (One-Time) accessToken before launch
+    let freshAccessToken = userPayload.accessToken || 'offline_token';
+    if (userPayload.username && userPayload.password) {
+      sendProgress('authenticating', 5, 'กำลังยืนยันตัวตนอีกครั้ง...');
+      try {
+        const loginEndpoint = `${apiDomain}/minecraft/api/login`;
+        const response = await fetch(loginEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: userPayload.username, password: userPayload.password })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (response.ok && data.success) {
+          const userObj = data.user || data.data || data;
+          freshAccessToken = userObj.accessToken || userObj.token || 'offline_token';
+          console.log(`[Auth] Successfully obtained fresh accessToken for '${userPayload.username}'`);
+        }
+      } catch (e) {
+        console.warn('[Auth] Failed to get fresh accessToken, will use cached one. Error:', e.message);
+        // Fallback to cached token if re-auth fails
+      }
+    }
+
+    // บันทึก/อัปเดตไฟล์ config/authxcheck_client.json ทันที
+    saveAuthXCheckConfig(userPayload.username || 'Player', freshAccessToken, folderNamespace);
 
     // Step 1: Fetch Game Config from Web Server API
     let gameConfig = {
@@ -179,7 +217,7 @@ ipcMain.on('launch-game', async (event, userPayload) => {
     const authSession = {
       name: userPayload.username || defaultAuth.name,
       uuid: userPayload.uuid || defaultAuth.uuid,
-      accessToken: userPayload.accessToken || defaultAuth.accessToken || 'offline',
+      accessToken: freshAccessToken,
       clientToken: userPayload.uuid || defaultAuth.clientToken,
       meta: { online: false, type: 'crack' }
     };
@@ -209,20 +247,19 @@ ipcMain.on('launch-game', async (event, userPayload) => {
 
     // Step 4: Download Custom Extra Files (Mods, Configs, Resourcepacks) from Web Server API (25% - 40%)
     sendProgress('extra-files', 25, 'Checking Server Custom Files...');
-    
+
     await downloadCustomServerFiles(apiDomain, rootPath, (downloadProgress) => {
       const p = Math.round(25 + downloadProgress * 0.15); // Extra files: 25% to 40%
       sendProgress('extra-downloading', p, `Syncing Server Files (${downloadProgress}%)`);
     });
 
     // Setup File Logger inside Project Directory
-    const fs = require('fs');
     const logsDir = path.join(__dirname, 'logs');
     if (!fs.existsSync(logsDir)) {
       fs.mkdirSync(logsDir, { recursive: true });
     }
     const logFilePath = path.join(logsDir, 'launcher_game.log');
-    
+
     // เคลียร์ Log เก่า ล้างไฟล์เริ่มต้นใหม่ทุกครั้งที่กดเริ่มเกม
     fs.writeFileSync(logFilePath, `========== SESSION LAUNCHED AT ${new Date().toLocaleString('th-TH')} ==========\n`);
     const logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
@@ -240,6 +277,8 @@ ipcMain.on('launch-game', async (event, userPayload) => {
     // Step 5: Configure Launcher with EML-Lib Launcher Class
     const ignoredList = Array.isArray(userPayload.cleaningIgnored) ? userPayload.cleaningIgnored : [
       'mods/',
+      'config/',
+      'config/authxcheck_client.json',
       'crash-reports/',
       'logs/',
       'resourcepacks/',
@@ -331,7 +370,7 @@ ipcMain.on('launch-game', async (event, userPayload) => {
     launcher.on('progress', (data) => {
       const rawPercent = typeof data === 'number' ? data : (data.percent || 0);
       const percent = Math.round(50 + rawPercent * 0.25); // Game Assets/Jars: 50% to 75%
-      
+
       if (percent > lastLoggedPercent && percent % 5 === 0) {
         lastLoggedPercent = percent;
         logMessage(`[Progress ${percent}%] Downloading files... (${rawPercent}%)`);
@@ -363,6 +402,36 @@ ipcMain.on('launch-game', async (event, userPayload) => {
   }
 });
 
+// ฟังก์ชันและ IPC บันทึก/อัปเดตไฟล์ config/authxcheck_client.json
+function saveAuthXCheckConfig(username, accessToken, folderNamespace = 'the_new_launcher') {
+  try {
+    const cleanNamespace = (folderNamespace || 'the_new_launcher').replace(/^\.+/, '');
+    const rootPath = path.join(app.getPath('appData'), `.${cleanNamespace}`);
+    const configDir = path.join(rootPath, 'config');
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
+    const authxCheckPath = path.join(configDir, 'authxcheck_client.json');
+    let authxData = { secretKey: accessToken || 'offline_token', username: username || 'Player' };
+    if (fs.existsSync(authxCheckPath)) {
+      try {
+        const existingContent = JSON.parse(fs.readFileSync(authxCheckPath, 'utf8'));
+        authxData = { ...existingContent, username: username || 'Player', secretKey: accessToken || 'offline_token' };
+      } catch (e) {
+        // ใช้ค่าเริ่มต้นหากอ่านไฟล์เดิมไม่สำเร็จ
+      }
+    }
+    fs.writeFileSync(authxCheckPath, JSON.stringify(authxData, null, 2));
+    console.log(`[AuthXCheck] Saved client config upon login to: ${authxCheckPath}`);
+  } catch (err) {
+    console.warn('[AuthXCheck] Failed to save authxcheck_client.json:', err.message);
+  }
+}
+
+ipcMain.on('save-authxcheck-config', (event, payload) => {
+  saveAuthXCheckConfig(payload?.username, payload?.accessToken, payload?.gameFolderNamespace);
+});
+
 ipcMain.on('window-minimize', () => {
   if (mainWindow) mainWindow.minimize();
 });
@@ -374,21 +443,20 @@ ipcMain.on('window-close', () => {
 // ลบโฟลเดอร์ namespace เกม (ใช้สำหรับติดตั้งใหม่)
 ipcMain.handle('delete-namespace-folder', async (event, payload) => {
   try {
-    const fs = require('fs');
     const folderNamespace = payload?.gameFolderNamespace || 'the_new_launcher';
-    const cleanNamespace = folderNamespace.replace(/^\\.+/, '');
+    const cleanNamespace = folderNamespace.replace(/^\.+/, '');
     const rootPath = path.join(app.getPath('appData'), `.${cleanNamespace}`);
-    logMessage(`[Repair] Deleting namespace folder: ${rootPath}`);
+    console.log(`[Repair] Deleting namespace folder: ${rootPath}`);
     if (fs.existsSync(rootPath)) {
       fs.rmSync(rootPath, { recursive: true, force: true });
-      logMessage(`[Repair] Namespace folder deleted successfully.`);
+      console.log(`[Repair] Namespace folder deleted successfully.`);
       return { success: true };
     } else {
-      logMessage(`[Repair] Namespace folder not found (already clean): ${rootPath}`);
+      console.log(`[Repair] Namespace folder not found (already clean): ${rootPath}`);
       return { success: true };
     }
   } catch (e) {
-    logMessage(`[Repair] Failed to delete namespace folder: ${e.message}`);
+    console.error(`[Repair] Failed to delete namespace folder: ${e.message}`);
     return { success: false, error: e.message };
   }
 });
@@ -403,16 +471,34 @@ app.whenReady().then(() => {
   });
 });
 
-// Helper Function: ดาวน์โหลดไฟล์เสริม (Mods, Configs, Resourcepacks) จาก Web Server API (รองรับ manifest.json + SHA256 Hash)
+// Helper Function: ดาวน์โหลดไฟล์เสริม (Mods, Configs, Resourcepacks) จาก Web Server API (รองรับ manifest.json + SHA256 Hash + ป้องกัน ENOTDIR)
 async function downloadCustomServerFiles(apiDomain, rootPath, onProgress) {
-  const fs = require('fs');
   const path = require('path');
   const crypto = require('crypto');
+
+  // ฟังก์ชันช่วยเหลือในการสร้างไดเรกทอรีอย่างปลอดภัย (หากมีไฟล์ชื่อซ้ำขวางอยู่ จะลบไฟล์ทิ้งเพื่อเปิดทางให้สร้างไดเรกทอรีได้)
+  const ensureDirSafe = (dirPath) => {
+    try {
+      if (fs.existsSync(dirPath)) {
+        const stat = fs.statSync(dirPath);
+        if (!stat.isDirectory()) {
+          fs.unlinkSync(dirPath);
+          fs.mkdirSync(dirPath, { recursive: true });
+        }
+      } else {
+        fs.mkdirSync(dirPath, { recursive: true });
+      }
+    } catch (e) {
+      console.warn(`[DirCheck] Could not ensure directory ${dirPath}:`, e.message);
+    }
+  };
 
   // คำนวณ SHA256 Hash ของไฟล์ในเครื่อง
   const getFileHash = (filePath) => {
     try {
       if (!fs.existsSync(filePath)) return null;
+      const stat = fs.statSync(filePath);
+      if (!stat.isFile()) return null;
       const fileBuffer = fs.readFileSync(filePath);
       return crypto.createHash('sha256').update(fileBuffer).digest('hex');
     } catch (e) {
@@ -421,19 +507,21 @@ async function downloadCustomServerFiles(apiDomain, rootPath, onProgress) {
   };
 
   try {
+    ensureDirSafe(rootPath);
+
     // ลองยิงไปที่ /minecraft/api/manifest.json ก่อน ถ้าไม่มีค่อย fallback ไปที่ /minecraft/api/files
     let manifestRes = await fetch(`${apiDomain}/minecraft/api/manifest.json`).catch(() => null);
     if (!manifestRes || !manifestRes.ok) {
       manifestRes = await fetch(`${apiDomain}/minecraft/api/files`).catch(() => null);
     }
-    
+
     if (!manifestRes || !manifestRes.ok) return;
 
     const data = await manifestRes.json().catch(() => ({}));
     const files = data.files || []; // [{ path: "mods/mod1.jar", hash: "...", size: 1234, url: "http://..." }]
     if (!Array.isArray(files) || files.length === 0) return;
 
-    // 1. สแกนและลบไฟล์แปลกปลอมในโฟลเดอร์ mods ที่ไม่อยู่ในรายการ manifest.json (ป้องกันผู้เล่นแอบแฮก/ใส่โปร)
+    // 1. สแกนและลบไฟล์แปลกปลอมในโฟลเดอร์ mods ที่ไม่อยู่ในรายการ manifest.json
     const allowedModPaths = new Set(
       files
         .map(f => f.path ? path.normalize(f.path).toLowerCase() : null)
@@ -442,35 +530,56 @@ async function downloadCustomServerFiles(apiDomain, rootPath, onProgress) {
 
     const modsDir = path.join(rootPath, 'mods');
     if (fs.existsSync(modsDir)) {
-      const localModFiles = fs.readdirSync(modsDir, { recursive: true });
-      for (const relativeFile of localModFiles) {
-        const fullLocalPath = path.join(modsDir, relativeFile);
-        const stat = fs.statSync(fullLocalPath);
-        
-        if (stat.isFile()) {
-          const normalizedRelPath = path.normalize(`mods/${relativeFile}`).toLowerCase();
-          // ถ้าไฟล์นี้ไม่อยู่ใน manifest.json ให้ลบทิ้งทันที!
-          if (!allowedModPaths.has(normalizedRelPath)) {
-            console.warn(`[Protection] Removing unauthorized mod/file: ${normalizedRelPath}`);
-            try {
-              fs.unlinkSync(fullLocalPath);
-            } catch (err) {
-              console.error(`[Protection] Failed to remove illegal file ${fullLocalPath}:`, err.message);
+      const modsStat = fs.statSync(modsDir);
+      if (modsStat.isDirectory()) {
+        const localModFiles = fs.readdirSync(modsDir, { recursive: true });
+        for (const relativeFile of localModFiles) {
+          const fullLocalPath = path.join(modsDir, relativeFile);
+          try {
+            const stat = fs.statSync(fullLocalPath);
+            if (stat.isFile()) {
+              const normalizedRelPath = path.normalize(`mods/${relativeFile}`).toLowerCase();
+              if (!allowedModPaths.has(normalizedRelPath)) {
+                console.warn(`[Protection] Removing unauthorized mod/file: ${normalizedRelPath}`);
+                fs.unlinkSync(fullLocalPath);
+              }
             }
+          } catch (err) {
+            // ละเว้นหากไฟล์ถูกเคลื่อนย้ายไปแล้ว
           }
         }
+      } else {
+        // หาก mods เป็นไฟล์ ให้ลบทิ้งเพื่อเตรียมสร้างโฟลเดอร์ mods
+        fs.unlinkSync(modsDir);
       }
     }
 
     // 2. ดำเนินการตรวจสอบ Hash และดาวน์โหลดไฟล์ม็อดที่ถูกต้อง
     let completed = 0;
     for (const file of files) {
-      if (!file.path || !file.url) continue;
+      if (!file.path) continue;
 
-      const targetPath = path.join(rootPath, file.path);
+      const normalizedRelPath = path.normalize(file.path);
+      const targetPath = path.join(rootPath, normalizedRelPath);
+
+      // หากรายการใน manifest เป็นการประกาศโฟลเดอร์
+      if (file.path.endsWith('/') || file.path.endsWith('\\') || file.type === 'FOLDER' || file.type === 'directory') {
+        ensureDirSafe(targetPath);
+        completed++;
+        if (onProgress) onProgress(Math.round((completed / files.length) * 100));
+        continue;
+      }
+
       const targetDir = path.dirname(targetPath);
+      ensureDirSafe(targetDir);
 
-      // ตรวจสอบ Hash ถ้าตรงกันอยู่แล้วไม่ต้องโหลดซ้ำ!
+      if (!file.url) {
+        completed++;
+        if (onProgress) onProgress(Math.round((completed / files.length) * 100));
+        continue;
+      }
+
+      // ตรวจสอบ Hash ถ้าตรงกันอยู่แล้วไม่ต้องโหลดซ้ำ
       if (file.hash) {
         const localHash = getFileHash(targetPath);
         if (localHash && localHash.toLowerCase() === file.hash.toLowerCase()) {
@@ -481,8 +590,12 @@ async function downloadCustomServerFiles(apiDomain, rootPath, onProgress) {
         }
       }
 
-      if (!fs.existsSync(targetDir)) {
-        fs.mkdirSync(targetDir, { recursive: true });
+      // หากมีโฟลเดอร์ชื่อเดียวกับไฟล์ปลายทางขวางอยู่ ให้ลบทิ้งก่อนเซฟไฟล์
+      if (fs.existsSync(targetPath)) {
+        const targetStat = fs.statSync(targetPath);
+        if (targetStat.isDirectory()) {
+          fs.rmSync(targetPath, { recursive: true, force: true });
+        }
       }
 
       // ดาวน์โหลดไฟล์ใหม่กรณีม็อดมีการอัปเดตหรือยังไม่มีไฟล์

@@ -3,10 +3,11 @@
 const BUILD_CONFIG = {
   apiDomain: 'http://localhost:80', // Web Server API URL (e.g. 'http://localhost:3000' or 'https://api.yourserver.com')
   gameFolderNamespace: '.the_new_launcher', // Custom game folder name inside app installation directory
-  
+
   // รายการโฟลเดอร์/ไฟล์ที่ไม่ต้องการให้ EML-Lib ลบทิ้งตอนสแกนคลีนก่อนรันเกม
   cleaningIgnored: [
     'mods/',
+    'config/authxcheck_client.json',
     'crash-reports/',
     'logs/',
     'resourcepacks/',
@@ -88,6 +89,8 @@ class AppConfig {
   get cleaningIgnored() {
     return BUILD_CONFIG.cleaningIgnored || [
       'mods/',
+      'config/',
+      'config/authxcheck_client.json',
       'crash-reports/',
       'logs/',
       'resourcepacks/',

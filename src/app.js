@@ -82,12 +82,12 @@ class AppUI {
     if (!val) return;
 
     // Check if value is a URL, image path or file extension
-    const isImage = val.startsWith('http://') || 
-                    val.startsWith('https://') || 
-                    val.startsWith('data:') || 
-                    val.includes('/') || 
-                    val.includes('\\') || 
-                    /\.(png|jpg|jpeg|svg|webp|gif)$/i.test(val);
+    const isImage = val.startsWith('http://') ||
+      val.startsWith('https://') ||
+      val.startsWith('data:') ||
+      val.includes('/') ||
+      val.includes('\\') ||
+      /\.(png|jpg|jpeg|svg|webp|gif)$/i.test(val);
 
     if (isImage) {
       if (logoImg) {
@@ -296,12 +296,15 @@ class AppUI {
           const finalName = userObj.username || userObj.name || username;
           const finalUUID = getOrGenerateUUID(userObj, finalName);
           const finalToken = userObj.accessToken || userObj.token || 'offline_token';
+          const finalSkin = userObj.skinUrl || userObj.skin || userObj.avatar || null;
 
           this.clearAlert();
           this.currentUser = {
             name: finalName,
             uuid: finalUUID,
             accessToken: finalToken,
+            password: password, // Store password for re-authentication on launch
+            skinUrl: finalSkin,
             loggedInAt: new Date().toISOString()
           };
           localStorage.setItem('launcher_user', JSON.stringify(this.currentUser));
@@ -389,12 +392,15 @@ class AppUI {
           const finalName = userObj.username || userObj.name || username;
           const finalUUID = getOrGenerateUUID(userObj, finalName);
           const finalToken = userObj.accessToken || userObj.token || 'offline_token';
+          const finalSkin = userObj.skinUrl || userObj.skin || userObj.avatar || null;
 
           this.clearAlert();
           this.currentUser = {
             name: finalName,
             uuid: finalUUID,
             accessToken: finalToken,
+            password: password, // Store password for re-authentication on launch
+            skinUrl: finalSkin,
             loggedInAt: new Date().toISOString()
           };
           localStorage.setItem('launcher_user', JSON.stringify(this.currentUser));
@@ -522,7 +528,7 @@ class AppUI {
     if (this.currentUser) {
       // Logged in: collapse sidebar to narrow icon bar (~1/12 size, 80px)
       if (mainSidebar) {
-        mainSidebar.className = 'w-20 min-w-[80px] max-w-[80px] bg-[#0c101c]/90 backdrop-blur-md px-3 pt-6 pb-6 flex flex-col z-20 h-full relative transition-all duration-300';
+        mainSidebar.className = 'w-20 min-w-[80px] max-w-[80px] bg-[#0c101c]/90 backdrop-blur-md px-3 pt-6 pb-6 flex flex-col z-20 h-full relative transition-all duration-300 rounded-l-3xl';
       }
       if (sidebarAuth) sidebarAuth.classList.add('hidden');
       if (sidebarApp) sidebarApp.classList.remove('hidden');
@@ -532,8 +538,7 @@ class AppUI {
 
       if (userNameEl) userNameEl.innerText = this.currentUser.name;
       if (userAvatarEl) {
-        // Load Minecraft skin head avatar using mc-heads API
-        userAvatarEl.src = `https://mc-heads.net/avatar/${encodeURIComponent(this.currentUser.name)}/64`;
+        this.loadUserAvatar(this.currentUser.name, this.currentUser.skinUrl, userAvatarEl);
       }
 
       // Inject server name and description from appConfig
@@ -549,13 +554,13 @@ class AppUI {
           serverDescEl.appendChild(p);
         });
       }
-      
+
       // Fetch online player count from server if available
       this.fetchServerPlayerCount();
     } else {
       // Logged out: expand sidebar to auth form (1/3 size, 320px)
       if (mainSidebar) {
-        mainSidebar.className = 'w-1/3 min-w-[320px] max-w-[340px] bg-[#0c101c]/80 backdrop-blur-md px-8 pt-8 pb-8 flex flex-col z-20 h-full relative transition-all duration-300';
+        mainSidebar.className = 'w-1/3 min-w-[320px] max-w-[340px] bg-[#0c101c]/80 backdrop-blur-md px-8 pt-8 pb-8 flex flex-col z-20 h-full relative transition-all duration-300 rounded-l-3xl';
       }
       if (sidebarAuth) sidebarAuth.classList.remove('hidden');
       if (sidebarApp) sidebarApp.classList.add('hidden');
@@ -563,6 +568,20 @@ class AppUI {
       if (userNameEl) userNameEl.innerText = 'Player';
       if (userAvatarEl) userAvatarEl.src = 'https://mc-heads.net/avatar/steve/64';
     }
+  }
+
+  // Dynamic Avatar Loader using mc-heads.net/avatar/{username}
+  loadUserAvatar(username, skinUrl, imgElement) {
+    if (!imgElement || !username) return;
+
+    const avatarUrl = skinUrl || `https://mc-heads.net/avatar/${encodeURIComponent(username)}`;
+
+    imgElement.onerror = () => {
+      imgElement.onerror = null;
+      imgElement.src = 'https://mc-heads.net/avatar/Steve';
+    };
+
+    imgElement.src = avatarUrl;
   }
 
   async fetchServerPlayerCount() {
@@ -662,16 +681,17 @@ class AppUI {
         cleaningIgnored: appConfig.cleaningIgnored,
         username: this.currentUser ? this.currentUser.name : 'Player',
         uuid: this.currentUser ? this.currentUser.uuid : null,
-        accessToken: this.currentUser ? this.currentUser.accessToken : null
+        accessToken: this.currentUser ? this.currentUser.accessToken : null,
+        password: this.currentUser ? this.currentUser.password : null
       };
 
       const progressListener = (event, data) => {
         const percent = data.percent || 0;
         if (progressBar) progressBar.style.width = `${percent}%`;
-        
+
         // Detailed text shown above button
         if (statusTextLabel) statusTextLabel.innerText = data.text || '';
-        
+
         // Clean short text inside button
         if (textLabel) {
           if (data.status === 'launched') {
@@ -712,7 +732,7 @@ class AppUI {
         if (progress >= 100) {
           clearInterval(interval);
           if (textLabel) textLabel.innerText = 'กำลังเปิดเกม...';
-          
+
           setTimeout(() => {
             btn.disabled = false;
             if (progressBar) progressBar.style.width = '0%';
