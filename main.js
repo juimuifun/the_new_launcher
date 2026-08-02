@@ -476,6 +476,18 @@ ipcMain.on('launch-game', async (event, userPayload) => {
       sendProgress('downloading', 50, `Downloading game files (${amount} files)...`);
     });
 
+    launcher.on('download_progress', (info) => {
+      const downloaded = info?.downloaded?.amount || 0;
+      const total = info?.total?.amount || 0;
+      const size = info?.downloaded?.size || 0;
+      const speed = info?.speed || 0;
+      logMessage(`[Download] ${downloaded}/${total} files (${Math.round(size / 1024 / 1024)} MB, ${speed} KB/s)`);
+    });
+
+    launcher.on('download_error', (error) => {
+      logMessage(`[Download Error] ${error?.message || JSON.stringify(error)}`);
+    });
+
     launcher.on('launch_install_loader', (loaderInfo) => {
       logMessage(`[Progress 75%] Installing Mod Loader (${loaderInfo?.loader || 'Loader'})...`);
       sendProgress('install_loader', 75, `Installing Mod Loader (${loaderInfo?.loader || 'Loader'})...`);
@@ -494,6 +506,16 @@ ipcMain.on('launch-game', async (event, userPayload) => {
     launcher.on('launch_patch_loader', () => {
       logMessage('[Progress 95%] Patching Mod Loader...');
       sendProgress('patching', 95, 'Patching Mod Loader...');
+    });
+
+    launcher.on('launch_check_java', () => {
+      logMessage('[Progress 88%] Checking Java runtime...');
+      sendProgress('checking-java', 88, 'Checking Java runtime...');
+    });
+
+    launcher.on('launch_clean', () => {
+      logMessage('[Progress 97%] Cleaning launch workspace...');
+      sendProgress('cleaning', 97, 'Cleaning launch workspace...');
     });
 
     launcher.on('launch_launch', () => {
