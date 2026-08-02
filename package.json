@@ -1,6 +1,6 @@
 {
   "name": "the_new_launcher",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Clean Electron Minecraft Launcher",
   "main": "main.js",
   "scripts": {

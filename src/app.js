@@ -17,12 +17,6 @@ class AppUI {
       this.updateUserDisplay();
       this.initAutoUpdater();
 
-      // Reset user session on application launch (Manual Log in each start)
-      this.currentUser = null;
-      localStorage.removeItem('launcher_user');
-      this.updateUserDisplay();
-      this.switchView('view-auth');
-
       i18n.subscribe(() => {
         this.updateTranslations();
       });
@@ -116,12 +110,53 @@ class AppUI {
       if (btnClose) {
         btnClose.addEventListener('click', () => ipcRenderer.send('window-close'));
       }
+
+      // Get app version for display
+      ipcRenderer.invoke('get-app-version').then(version => {
+        const versionEl = document.getElementById('app-version-display');
+        if (versionEl) versionEl.innerText = version;
+      });
     }
   }
 
   initAutoUpdater() {
     if (window.require) {
       const { ipcRenderer } = window.require('electron');
+      const updateCheckOverlay = document.getElementById('update-check-overlay');
+      const statusText = document.getElementById('update-check-status-text');
+      const subText = document.getElementById('update-check-sub-text');
+      const progressWrap = document.getElementById('update-check-progress-wrap');
+      const progressBar = document.getElementById('update-check-progress-bar');
+
+      const endUpdateCheck = () => {
+        if (updateCheckOverlay) {
+          updateCheckOverlay.classList.add('opacity-0', 'pointer-events-none');
+          setTimeout(() => updateCheckOverlay.classList.add('hidden'), 300);
+        }
+        // Reset user session and show auth view after check is complete
+        this.currentUser = null;
+        localStorage.removeItem('launcher_user');
+        this.updateUserDisplay();
+        this.switchView('view-auth');
+      };
+
+      ipcRenderer.on('updater-message', (event, data) => {
+        if (data.status === 'checking') {
+          if (statusText) statusText.innerText = 'กำลังตรวจสอบอัปเดต...';
+        } else if (data.status === 'available') {
+          if (statusText) statusText.innerText = 'พบอัปเดตใหม่ กำลังดาวน์โหลด...';
+          if (subText) subText.innerText = `เวอร์ชัน ${data.version}`;
+          if (progressWrap) progressWrap.classList.remove('hidden');
+        } else if (data.status === 'not-available') {
+          if (statusText) statusText.innerText = 'Launcher เป็นเวอร์ชันล่าสุดแล้ว';
+          setTimeout(endUpdateCheck, 1000);
+        } else if (data.status === 'error') {
+          if (statusText) statusText.innerText = 'ไม่สามารถตรวจสอบอัปเดตได้';
+          if (subText) subText.innerText = 'ข้ามขั้นตอนนี้และดำเนินการต่อ...';
+          setTimeout(endUpdateCheck, 1500);
+        }
+      });
+
       const updateModal = document.getElementById('update-modal');
       const updateTitle = document.getElementById('update-modal-title');
       const updateDesc = document.getElementById('update-modal-desc');
@@ -134,10 +169,10 @@ class AppUI {
 
       // Show progress in modal if available
       ipcRenderer.on('updater-progress', (event, data) => {
-        if (updateModal && !updateModal.classList.contains('hidden')) {
-          if (updateProgressWrap) updateProgressWrap.classList.remove('hidden');
-          if (updateProgressBar) updateProgressBar.style.width = `${data.percent}%`;
-          if (updateProgressText) updateProgressText.innerText = `${data.percent}%`;
+        // Update both the startup overlay and the later modal
+        if (progressBar) progressBar.style.width = `${data.percent}%`;
+        if (updateProgressBar) {
+          updateProgressBar.style.width = `${data.percent}%`;
         }
       });
 
@@ -150,21 +185,10 @@ class AppUI {
           }
           if (updateProgressWrap) updateProgressWrap.classList.add('hidden');
           if (updateActions) updateActions.classList.remove('hidden');
-          updateModal.classList.remove('hidden');
-        }
-      });
 
-      ipcRenderer.on('updater-message', (event, data) => {
-        if (data.status === 'downloaded') {
-          if (updateModal) {
-            if (updateTitle) updateTitle.innerText = i18n.t('updateReadyTitle');
-            if (updateDesc) {
-              updateDesc.innerHTML = i18n.t('updateModalDesc', { version: `<strong class="custom-accent-text font-bold">${data.version || ''}</strong>` });
-            }
-            if (updateProgressWrap) updateProgressWrap.classList.add('hidden');
-            if (updateActions) updateActions.classList.remove('hidden');
-            updateModal.classList.remove('hidden');
-          }
+          // Hide startup overlay and show the final modal
+          if (updateCheckOverlay) updateCheckOverlay.classList.add('hidden');
+          updateModal.classList.remove('hidden');
         }
       });
 

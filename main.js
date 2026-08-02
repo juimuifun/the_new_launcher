@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const fs = require('fs');
 
@@ -37,6 +37,12 @@ function createWindow() {
       autoUpdater.checkForUpdates();
     } else {
       console.log('Development mode: Skipping autoUpdater check');
+      // ส่งข้อความกลับไปที่ UI เพื่อบอกว่าไม่ต้องรอเช็คอัปเดต
+      if (mainWindow) {
+        mainWindow.webContents.send('updater-message', {
+          status: 'not-available'
+        });
+      }
     }
   });
 }
@@ -111,6 +117,11 @@ ipcMain.on('check-for-update-manual', () => {
       });
     }
   }
+});
+
+// IPC Handler to get app version
+ipcMain.handle('get-app-version', () => {
+  return app.getVersion();
 });
 
 // ----------------------------------------------------
