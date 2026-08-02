@@ -303,11 +303,11 @@ ipcMain.on('launch-game', async (event, userPayload) => {
       sendProgress('extra-downloading', p, `Syncing Server Files (${downloadProgress}%)`);
     });
 
-    // Setup File Logger inside the Minecraft game's 'logs' directory
-    // This ensures logs are stored with other game logs (e.g., in %APPDATA%/.the_new_launcher/logs)
-    const logsDir = path.join(rootPath, 'logs');
-    ensureDirSafe(logsDir); // Use the safe directory creation helper
-
+    // Setup File Logger inside Project Directory
+    const logsDir = path.join(__dirname, 'logs');
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
     const logFilePath = path.join(logsDir, 'launcher_game.log');
 
     // เคลียร์ Log เก่า ล้างไฟล์เริ่มต้นใหม่ทุกครั้งที่กดเริ่มเกม
