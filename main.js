@@ -129,6 +129,49 @@ ipcMain.handle('get-app-version', () => {
 // ----------------------------------------------------
 const path = require('path');
 
+// Helper Function: ป้องกันและแก้ปัญหา ENOTDIR โดยการตรวจสอบและลบไฟล์ที่ขวางโฟลเดอร์ในทุกระดับ Subpath
+function ensureDirSafe(targetPath) {
+  try {
+    if (!targetPath) return;
+    const normalized = path.normalize(targetPath);
+    const root = path.parse(normalized).root;
+    const segments = normalized.replace(root, '').split(path.sep).filter(Boolean);
+
+    let current = root;
+    for (const segment of segments) {
+      current = path.join(current, segment);
+      if (fs.existsSync(current)) {
+        try {
+          const stat = fs.statSync(current);
+          if (!stat.isDirectory()) {
+            console.warn(`[ENOTDIR Protection] Found file where directory expected, removing: ${current}`);
+            fs.rmSync(current, { force: true, recursive: true });
+            fs.mkdirSync(current, { recursive: true });
+          }
+        } catch (statErr) {
+          try {
+            fs.rmSync(current, { force: true, recursive: true });
+          } catch (e) {}
+          fs.mkdirSync(current, { recursive: true });
+        }
+      } else {
+        fs.mkdirSync(current, { recursive: true });
+      }
+    }
+  } catch (err) {
+    console.warn(`[ENOTDIR Protection] ensureDirSafe error for ${targetPath}:`, err.message);
+    try {
+      if (fs.existsSync(targetPath)) {
+        const stat = fs.statSync(targetPath);
+        if (!stat.isDirectory()) {
+          fs.rmSync(targetPath, { force: true, recursive: true });
+        }
+      }
+      fs.mkdirSync(targetPath, { recursive: true });
+    } catch (e) {}
+  }
+}
+
 ipcMain.on('launch-game', async (event, userPayload) => {
   try {
     const { Launcher, Java, CrackAuth, ServerStatus } = await import('eml-lib');
@@ -138,19 +181,11 @@ ipcMain.on('launch-game', async (event, userPayload) => {
     // Game directory path (e.g., %APPDATA%/.the_new_launcher)
     const rootPath = path.join(app.getPath('appData'), `.${folderNamespace}`);
 
-    // Prevent ENOTDIR by ensuring rootPath is always a directory
-    if (fs.existsSync(rootPath)) {
-      try {
-        const rootStat = fs.statSync(rootPath);
-        if (!rootStat.isDirectory()) {
-          fs.unlinkSync(rootPath); // Delete if it's a file
-          fs.mkdirSync(rootPath, { recursive: true });
-        }
-      } catch (e) {
-        fs.mkdirSync(rootPath, { recursive: true }); // Recreate if stat fails
-      }
-    } else {
-      fs.mkdirSync(rootPath, { recursive: true });
+    // Prevent ENOTDIR by ensuring rootPath and all standard Minecraft subdirectories are valid folders
+    ensureDirSafe(rootPath);
+    const standardDirs = ['assets', 'libraries', 'versions', 'natives', 'mods', 'config', 'runtime', 'saves', 'resourcepacks', 'shaderpacks'];
+    for (const dirName of standardDirs) {
+      ensureDirSafe(path.join(rootPath, dirName));
     }
 
     // ----------------------------------------------------
@@ -423,9 +458,7 @@ function saveAuthXCheckConfig(username, accessToken, folderNamespace = 'the_new_
     const cleanNamespace = (folderNamespace || 'the_new_launcher').replace(/^\.+/, '');
     const rootPath = path.join(app.getPath('appData'), `.${cleanNamespace}`);
     const configDir = path.join(rootPath, 'config');
-    if (!fs.existsSync(configDir)) {
-      fs.mkdirSync(configDir, { recursive: true });
-    }
+    ensureDirSafe(configDir);
     const authxCheckPath = path.join(configDir, 'authxcheck_client.json');
     let authxData = { secretKey: accessToken || 'offline_token', username: username || 'Player' };
     if (fs.existsSync(authxCheckPath)) {
@@ -491,26 +524,6 @@ app.whenReady().then(() => {
 async function downloadCustomServerFiles(apiDomain, rootPath, onProgress) {
   const path = require('path');
   const crypto = require('crypto');
-
-  // Helper to ensure a directory exists, deleting any file that might be in the way.
-  const ensureDirSafe = (dirPath) => {
-    try {
-      if (fs.existsSync(dirPath)) {
-        const stat = fs.statSync(dirPath);
-        if (!stat.isDirectory()) {
-          console.warn(`[DirCheck] Path exists but is a file, removing: ${dirPath}`);
-          fs.unlinkSync(dirPath);
-          fs.mkdirSync(dirPath, { recursive: true });
-        }
-      } else {
-        fs.mkdirSync(dirPath, { recursive: true });
-      }
-    } catch (err) {
-      console.warn(`[DirCheck] Could not ensure directory ${dirPath}:`, err.message);
-      // If all else fails, try to create it again.
-      if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
-    }
-  };
 
   // คำนวณ SHA256 Hash ของไฟล์ในเครื่อง
   const getFileHash = (filePath) => {
