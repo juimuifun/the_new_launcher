@@ -124,6 +124,17 @@ ipcMain.handle('get-app-version', () => {
   return app.getVersion();
 });
 
+// IPC Handler to check if game namespace folder exists
+ipcMain.handle('check-namespace-exists', (event, folderNamespace) => {
+  try {
+    const cleanNamespace = (folderNamespace || 'the_new_launcher').replace(/^\.+/, '');
+    const rootPath = path.join(app.getPath('appData'), `.${cleanNamespace}`);
+    return fs.existsSync(rootPath);
+  } catch (e) {
+    return false;
+  }
+});
+
 // ----------------------------------------------------
 // EML-Lib Minecraft Launching & Status System
 // ----------------------------------------------------
@@ -140,23 +151,22 @@ function ensureDirSafe(targetPath) {
     let current = root;
     for (const segment of segments) {
       current = path.join(current, segment);
-      if (fs.existsSync(current)) {
-        try {
-          const stat = fs.statSync(current);
-          if (!stat.isDirectory()) {
-            console.warn(`[ENOTDIR Protection] Found file where directory expected, removing: ${current}`);
-            fs.rmSync(current, { force: true, recursive: true });
-            fs.mkdirSync(current, { recursive: true });
-          }
-        } catch (statErr) {
+      try {
+        if (fs.existsSync(current)) {
           try {
-            fs.rmSync(current, { force: true, recursive: true });
-          } catch (e) { }
+            const stat = fs.statSync(current);
+            if (!stat.isDirectory()) {
+              console.warn(`[ENOTDIR Protection] Found file where directory expected, removing: ${current}`);
+              fs.rmSync(current, { force: true, recursive: true });
+              fs.mkdirSync(current, { recursive: true });
+            }
+          } catch (statErr) {
+            // หากติด File Lock / EPERM หรือ statSync ล้มเหลว ให้ละเว้นกรณีโฟลเดอร์มีอยู่แล้ว
+          }
+        } else {
           fs.mkdirSync(current, { recursive: true });
         }
-      } else {
-        fs.mkdirSync(current, { recursive: true });
-      }
+      } catch (e) { }
     }
   } catch (err) {
     console.warn(`[ENOTDIR Protection] ensureDirSafe error for ${targetPath}:`, err.message);
@@ -172,7 +182,23 @@ function ensureDirSafe(targetPath) {
   }
 }
 
+let isGameRunning = false;
+
 ipcMain.on('launch-game', async (event, userPayload) => {
+  if (isGameRunning) {
+    console.warn('[Launcher] Prevented duplicate game launch attempt.');
+    if (mainWindow) {
+      mainWindow.webContents.send('launch-progress', {
+        status: 'error',
+        percent: 0,
+        text: 'เกมกำลังทำงานอยู่ ไม่สามารถเปิดซ้อนหลายจอได้'
+      });
+    }
+    return;
+  }
+
+  isGameRunning = true;
+
   try {
     const { Launcher, Java, CrackAuth, ServerStatus } = await import('eml-lib');
     const apiDomain = userPayload.apiDomain || 'http://localhost:3000';
@@ -352,8 +378,13 @@ ipcMain.on('launch-game', async (event, userPayload) => {
       },
       account: authSession,
       memory: {
-        max: 4096,
+        max: parseInt(userPayload.maxRam) || 4096,
         min: 1024
+      },
+      window: {
+        width: parseInt(userPayload.windowWidth) || 854,
+        height: parseInt(userPayload.windowHeight) || 480,
+        fullscreen: !!userPayload.fullscreen
       },
       quickPlay: gameConfig.serverIp ? {
         type: 'multiplayer',
@@ -374,44 +405,51 @@ ipcMain.on('launch-game', async (event, userPayload) => {
     };
 
     launcher.on('launch_compute_download', () => {
-      logMessage('[Progress 45%] กำลังตรวจสอบและคำนวณไฟล์เกม...');
-      sendProgress('computing', 45, 'กำลังตรวจสอบและคำนวณไฟล์เกม...');
+      logMessage('[Progress 45%] Computing and verifying game files...');
+      sendProgress('computing', 45, 'Computing game files...');
     });
 
     launcher.on('launch_download', (info) => {
       const amount = info?.total?.amount || 0;
-      logMessage(`[Progress 50%] กำลังดาวน์โหลดไฟล์เกม (${amount} ไฟล์)`);
-      sendProgress('downloading', 50, `กำลังดาวน์โหลดไฟล์เกม (${amount} ไฟล์)`);
+      logMessage(`[Progress 50%] Downloading game files (${amount} files)...`);
+      sendProgress('downloading', 50, `Downloading game files (${amount} files)...`);
     });
 
     launcher.on('launch_install_loader', (loaderInfo) => {
-      logMessage(`[Progress 75%] กำลังติดตั้ง Mod Loader (${loaderInfo?.loader || 'Loader'})...`);
-      sendProgress('install_loader', 75, `กำลังติดตั้ง Mod Loader (${loaderInfo?.loader || 'Loader'})...`);
+      logMessage(`[Progress 75%] Installing Mod Loader (${loaderInfo?.loader || 'Loader'})...`);
+      sendProgress('install_loader', 75, `Installing Mod Loader (${loaderInfo?.loader || 'Loader'})...`);
     });
 
     launcher.on('launch_extract_natives', () => {
-      logMessage('[Progress 85%] กำลังสกัดไฟล์ระบบ Natives...');
-      sendProgress('natives', 85, 'กำลังสกัดไฟล์ระบบ Natives...');
+      logMessage('[Progress 85%] Extracting Natives...');
+      sendProgress('natives', 85, 'Extracting Natives...');
     });
 
     launcher.on('launch_copy_assets', () => {
-      logMessage('[Progress 90%] กำลังจัดเตรียมไฟล์ภาพและเสียง (Assets)...');
-      sendProgress('assets', 90, 'กำลังจัดเตรียมไฟล์ภาพและเสียง (Assets)...');
+      logMessage('[Progress 90%] Preparing Game Assets...');
+      sendProgress('assets', 90, 'Preparing Game Assets...');
     });
 
     launcher.on('launch_patch_loader', () => {
-      logMessage('[Progress 95%] กำลังปรับแต่ง Mod Loader...');
-      sendProgress('patching', 95, 'กำลังปรับแต่ง Mod Loader...');
+      logMessage('[Progress 95%] Patching Mod Loader...');
+      sendProgress('patching', 95, 'Patching Mod Loader...');
     });
 
     launcher.on('launch_launch', () => {
-      logMessage('[Progress 100%] เปิดเกมเรียบร้อยแล้ว!');
+      logMessage('[Progress 100%] Game Launched Successfully!');
       logMessage('[Launcher] Minecraft game window process spawned successfully!');
-      sendProgress('launched', 100, 'เปิดเกมเรียบร้อยแล้ว!');
+      sendProgress('launched', 100, 'Game Launched!');
+      if (mainWindow) {
+        mainWindow.webContents.send('game-status-changed', { isRunning: true });
+      }
     });
 
     launcher.on('launch_close', (code) => {
       logMessage(`[Launcher] Game process exited cleanly with code: ${code}`);
+      isGameRunning = false;
+      if (mainWindow) {
+        mainWindow.webContents.send('game-status-changed', { isRunning: false });
+      }
     });
 
     let lastLoggedPercent = -1;
@@ -433,6 +471,10 @@ ipcMain.on('launch-game', async (event, userPayload) => {
 
     launcher.on('launch_crash', (crashData) => {
       logMessage(`[Minecraft Crash Detected] Exit Code: ${crashData.code}, Log: ${crashData.logsPath}`);
+      isGameRunning = false;
+      if (mainWindow) {
+        mainWindow.webContents.send('game-status-changed', { isRunning: false });
+      }
     });
 
     launcher.on('data', (log) => {
@@ -443,6 +485,10 @@ ipcMain.on('launch-game', async (event, userPayload) => {
     logMessage('[Launcher] Starting Minecraft process execution...');
     await launcher.launch();
   } catch (error) {
+    isGameRunning = false;
+    if (mainWindow) {
+      mainWindow.webContents.send('game-status-changed', { isRunning: false });
+    }
     console.error('Launch Game Failed:', error);
     if (mainWindow) {
       mainWindow.webContents.send('launch-progress', { status: 'error', percent: 0, text: `Error: ${error.message}` });

@@ -387,7 +387,7 @@
                   </svg>
                   <!-- Short Text Label (Inside Button) -->
                   <span id="launch-btn-text" class="font-black text-base tracking-wide font-nexon"
-                    data-i18n="playNow">เริ่มเกม</span>
+                    data-i18n="playNow">PLAY NOW</span>
                 </div>
 
               </button>
@@ -409,58 +409,262 @@
         </div>
 
         <!-- VIEW 3: FORUM VIEW -->
-        <div id="view-forum" class="view-panel hidden flex-1 flex flex-col justify-start space-y-4">
-          <div
-            class="bg-slate-950/85 border border-slate-800/90 rounded-2xl p-6 shadow-2xl backdrop-blur max-w-xl space-y-3">
-            <h2 class="text-2xl font-black text-white font-nexon" data-i18n="navForum">Forum</h2>
-            <p class="text-xs text-slate-300 font-ekkamaivibe">Community discussions, announcements, and patch notes.
-            </p>
+        <div id="view-forum" class="view-panel hidden flex-1 flex flex-col justify-between h-full">
+          <div class="flex-1 flex flex-col h-full">
+            <!-- TOP BAR: Spacing & alignment matches view-home (pt-4 pb-2) -->
+            <div class="w-full flex items-center justify-between pt-4 pb-2">
+              <div class="flex items-center gap-3.5">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-center custom-accent-text shadow-md">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                  </svg>
+                </div>
+                <div class="flex flex-col justify-center">
+                  <span class="text-base font-bold text-white font-nexon leading-tight tracking-wide">FORUM &
+                    ANNOUNCEMENTS</span>
+                  <span class="text-xs text-slate-400 font-ekkamaivibe leading-tight mt-0.5"
+                    data-i18n="forumSubtitle">ข่าวสาร ประกาศ และอัปเดตเซิร์ฟเวอร์</span>
+                </div>
+              </div>
+
+              <!-- Page Indicator & Nav Buttons -->
+              <div class="flex items-center gap-3">
+                <span id="forum-page-indicator"
+                  class="text-xs font-bold text-slate-300 font-nexon bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800/80 shadow-sm">Page
+                  1 / 1</span>
+                <div class="flex items-center gap-1.5">
+                  <button id="forum-prev-page" title="Previous page"
+                    class="w-9 h-9 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800/80 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-md">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <button id="forum-next-page" title="Next page"
+                    class="w-9 h-9 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800/80 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-md">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- FORUM CONTENT GRID CONTAINER (2 rows x 3 columns = 6 items per page) -->
+            <div id="forum-container"
+              class="flex-1 mt-2 relative overflow-hidden flex flex-col select-none rounded-2xl">
+              <!-- Loading State -->
+              <div id="forum-loading"
+                class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-slate-400 bg-slate-950/40 backdrop-blur-sm rounded-2xl">
+                <svg class="w-8 h-8 animate-spin custom-accent-text" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                  </path>
+                </svg>
+                <span class="text-xs font-ekkamaivibe">Loading forum posts...</span>
+              </div>
+
+              <!-- Empty State -->
+              <div id="forum-empty"
+                class="hidden absolute inset-0 z-10 flex flex-col items-center justify-center text-slate-400 bg-slate-950/40 rounded-2xl">
+                <p class="text-sm font-ekkamaivibe">No posts found at this time.</p>
+              </div>
+
+              <!-- 2 Rows x 3 Columns Grid -->
+              <div id="forum-grid" class="grid grid-cols-3 grid-rows-2 gap-3 h-full w-full transition-all duration-300">
+                <!-- Forum cards will be rendered dynamically -->
+              </div>
+            </div>
+
+            <!-- Bottom Info Bar -->
+            <div class="pt-2 flex justify-between items-center text-[11px] text-slate-400 font-ekkamaivibe">
+              <span class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 custom-accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Scroll the mouse wheel to navigate 6 posts at a time
+              </span>
+              <span id="forum-total-count" class="font-semibold text-slate-300">0 posts total</span>
+            </div>
           </div>
         </div>
 
         <!-- VIEW 4: STORE VIEW -->
-        <div id="view-store" class="view-panel hidden flex-1 flex flex-col justify-start space-y-4">
-          <div
-            class="bg-slate-950/85 border border-slate-800/90 rounded-2xl p-6 shadow-2xl backdrop-blur max-w-xl space-y-3">
-            <h2 class="text-2xl font-black text-white font-nexon" data-i18n="navStore">Store</h2>
-            <p class="text-xs text-slate-300 font-ekkamaivibe">Server ranks, cosmetics, and special items webstore.</p>
+        <div id="view-store" class="view-panel hidden flex-1 flex flex-col justify-between h-full">
+          <div class="flex-1 flex flex-col h-full">
+            <div class="w-full flex items-center justify-between pt-4 pb-2">
+              <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-2xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-center custom-accent-text shadow-md">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                </div>
+                <div class="flex flex-col justify-center">
+                  <span class="text-base font-bold text-white font-nexon leading-tight tracking-wide">STORE</span>
+                  <span class="text-xs text-slate-400 font-ekkamaivibe leading-tight mt-0.5">Top hot items displayed 6 per page</span>
+                </div>
+              </div>
+
+            </div>
+
+            <div id="store-container" class="flex-1 mt-2 relative overflow-hidden flex flex-col select-none rounded-2xl">
+              <div id="store-loading"
+                class="hidden absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-slate-400 bg-slate-950/40 backdrop-blur-sm rounded-2xl">
+                <svg class="w-8 h-8 animate-spin custom-accent-text" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                  </path>
+                </svg>
+                <span class="text-xs font-ekkamaivibe">Loading hot store items...</span>
+              </div>
+
+              <div id="store-empty"
+                class="hidden absolute inset-0 z-10 flex flex-col items-center justify-center text-slate-400 bg-slate-950/40 rounded-2xl">
+                <p class="text-sm font-ekkamaivibe">No hot items available right now.</p>
+              </div>
+
+              <div id="store-grid" class="grid grid-cols-3 grid-rows-2 gap-3 h-full w-full transition-all duration-300"></div>
+            </div>
+
           </div>
         </div>
 
-        <!-- VIEW 5: SETTINGS VIEW (Only Language Selector) -->
-        <div id="view-setting" class="view-panel hidden flex-1 flex flex-col justify-start">
-          <div
-            class="bg-slate-950/85 border border-slate-800/90 rounded-2xl p-6 shadow-2xl backdrop-blur max-w-lg space-y-4">
-            <div>
-              <h2 class="text-xl font-bold text-white font-nexon" data-i18n="settingTitle">Launcher Configuration</h2>
-              <p class="text-xs text-slate-400 font-ekkamaivibe" data-i18n="settingSubtitle">Manage language and client
-                options</p>
-            </div>
+        <!-- VIEW 5: SETTINGS VIEW -->
+        <div id="view-setting" class="view-panel hidden flex-1 flex flex-col justify-between h-full">
+          <div class="flex-1 flex flex-col h-full overflow-hidden">
 
-            <div id="settings-alert"
-              class="hidden p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs font-ekkamaivibe">
-              <span data-i18n="settingsSavedMessage">Settings updated successfully!</span>
-            </div>
-
-            <form id="form-settings" class="space-y-4">
-              <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1 font-nexon"
-                  data-i18n="labelLanguage">Interface Language</label>
-                <select id="setting-language"
-                  class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none font-sans">
-                  <option value="en">English (Base)</option>
-                  <option value="th">ไทย (Thai)</option>
-                </select>
+            <!-- TOP BAR: Spacing & alignment matches view-home & view-forum (pt-4 pb-2) -->
+            <div class="w-full flex items-center justify-between pt-4 pb-2 shrink-0">
+              <div class="flex items-center gap-3.5">
+                <div
+                  class="w-12 h-12 rounded-2xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-center custom-accent-text shadow-md">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div class="flex flex-col justify-center">
+                  <span class="text-base font-bold text-white font-nexon leading-tight tracking-wide"
+                    data-i18n="settingTitle">LAUNCHER CONFIGURATION</span>
+                  <span class="text-xs text-slate-400 font-ekkamaivibe leading-tight mt-0.5"
+                    data-i18n="settingSubtitle">Manage game resolution, memory allocation, and launcher options</span>
+                </div>
               </div>
 
-              <div class="flex gap-3 pt-2">
-                <button type="submit"
-                  class="px-5 py-2 custom-accent-bg hover:opacity-90 text-white font-semibold rounded-xl text-xs shadow-lg transition-all font-nexon"
-                  data-i18n="btnSaveSettings">Save Settings</button>
-                <button type="button" data-target-view="view-home"
-                  class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition-colors font-nexon">Back
-                  to Home</button>
+            </div>
+
+            <!-- SETTINGS FORM & CONTENT AREA WITH SOLID DARK BACKDROP -->
+            <form id="form-settings" class="flex-1 mt-2 flex flex-col justify-between overflow-hidden">
+              <!-- Dark Solid Backdrop Container -->
+              <div
+                class="bg-slate-950/85 border border-slate-800/90 rounded-2xl p-5 shadow-2xl backdrop-blur-md overflow-y-auto flex-1 space-y-4">
+                <div class="space-y-4">
+
+                  <!-- 1. Fullscreen Option (Green inner background when active) -->
+                  <div class="flex items-center justify-between pb-3 border-b border-slate-800/80">
+                    <div>
+                      <h3 class="text-sm font-bold text-white font-nexon">Fullscreen</h3>
+                      <p class="text-xs text-slate-400 font-ekkamaivibe">Start instances in fullscreen mode.</p>
+                    </div>
+                    <label for="setting-fullscreen" class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" id="setting-fullscreen" class="sr-only peer">
+                      <div
+                        class="w-12 h-6 bg-slate-900 border border-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:custom-accent-bg peer-checked:border-transparent peer-checked:after:bg-white">
+                      </div>
+                    </label>
+                  </div>
+
+                  <!-- 2. Width & Height Options -->
+                  <div class="grid grid-cols-2 gap-4 pb-3 border-b border-slate-800/80">
+                    <div>
+                      <h3 class="text-sm font-bold text-white font-nexon mb-0.5">Width</h3>
+                      <p class="text-xs text-slate-400 font-ekkamaivibe mb-2">The width of the game window when
+                        launched.</p>
+                      <input type="text" id="setting-width" inputmode="numeric" pattern="[0-9]*" value="854"
+                        class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs font-mono font-bold text-slate-100 focus:outline-none custom-accent-focus">
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-bold text-white font-nexon mb-0.5">Height</h3>
+                      <p class="text-xs text-slate-400 font-ekkamaivibe mb-2">The height of the game window when
+                        launched.</p>
+                      <input type="text" id="setting-height" inputmode="numeric" pattern="[0-9]*" value="480"
+                        class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs font-mono font-bold text-slate-100 focus:outline-none custom-accent-focus">
+                    </div>
+                  </div>
+
+                  <!-- 3. Memory Allocation Option (RAM Slider with full-width bar & bottom presets) -->
+                  <div class="pb-3 border-b border-slate-800/80 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <h3 class="text-sm font-bold text-white font-nexon">Memory allocation</h3>
+                        <p class="text-xs text-slate-400 font-ekkamaivibe">Maximum memory available to each instance.
+                        </p>
+                      </div>
+                      <div
+                        class="px-3.5 py-1.5 bg-slate-900 border border-slate-800 rounded-xl font-mono text-xs font-bold text-white shadow-inner flex items-center gap-1">
+                        <span id="setting-ram-val">4096</span>
+                        <span class="text-slate-400 text-[10px]">MB</span>
+                      </div>
+                    </div>
+
+                    <!-- Full Width Slider Bar -->
+                    <div class="pt-1">
+                      <input type="range" id="setting-ram" min="1024" max="32768" step="512" value="4096"
+                        class="w-full h-2 bg-slate-900 rounded-lg appearance-none cursor-pointer border border-slate-800 accent-purple-500">
+                    </div>
+
+                    <!-- Bottom Labels: Min on Left, Presets in Middle, Max on Right -->
+                    <div class="flex items-center justify-between pt-1">
+                      <span class="text-[10px] text-slate-500 font-mono">1024 MB</span>
+
+                      <!-- Checkpoint Presets (2GB, 4GB, 8GB, 16GB) -->
+                      <div class="flex items-center gap-1.5">
+                        <button type="button" data-ram-preset="2048"
+                          class="ram-preset-btn px-2.5 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[11px] font-mono font-bold text-slate-300 hover:text-white rounded-lg transition-all">2GB</button>
+                        <button type="button" data-ram-preset="4096"
+                          class="ram-preset-btn px-2.5 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[11px] font-mono font-bold text-slate-300 hover:text-white rounded-lg transition-all">4GB</button>
+                        <button type="button" data-ram-preset="8192"
+                          class="ram-preset-btn px-2.5 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[11px] font-mono font-bold text-slate-300 hover:text-white rounded-lg transition-all">8GB</button>
+                        <button type="button" data-ram-preset="16384"
+                          class="ram-preset-btn px-2.5 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[11px] font-mono font-bold text-slate-300 hover:text-white rounded-lg transition-all">16GB</button>
+                      </div>
+
+                      <span id="setting-ram-max-label" class="text-[10px] text-slate-500 font-mono">32768 MB</span>
+                    </div>
+                  </div>
+
+                  <!-- 4. Interface Language -->
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <h3 class="text-sm font-bold text-white font-nexon" data-i18n="labelLanguage">Interface Language
+                      </h3>
+                      <p class="text-xs text-slate-400 font-ekkamaivibe">Select display language for launcher interface.
+                      </p>
+                    </div>
+                    <select id="setting-language"
+                      class="w-48 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs font-mono font-bold text-slate-100 focus:outline-none custom-accent-focus transition-all duration-150 appearance-none">
+                      <option value="en">English (Base)</option>
+                      <option value="th">ไทย (Thai)</option>
+                    </select>
+                  </div>
+
+                </div>
               </div>
+
+              <!-- Bottom Action Bar & Launcher Version Display on Bottom-Right -->
+              <div class="pt-3 pb-1 flex items-center justify-end shrink-0">
+                <div class="text-[11px] text-slate-400 font-mono font-medium">
+                  The New Launcher v<span id="setting-app-version">1.0.1</span>
+                </div>
+              </div>
+
             </form>
           </div>
         </div>
@@ -523,9 +727,48 @@
     </div>
   </div>
 
+  <!-- FORUM POST DETAIL MODAL -->
+  <div id="forum-modal"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 rounded-3xl">
+    <div
+      class="w-[880px] max-w-[94%] h-[530px] max-h-[92%] bg-[#0c101c] border border-slate-800/90 rounded-3xl shadow-2xl flex flex-col overflow-hidden relative">
+
+      <!-- Close Button -->
+      <button id="forum-modal-close" title="Close"
+        class="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-950/80 hover:bg-slate-900 text-slate-400 hover:text-white flex items-center justify-center transition-colors border border-slate-800/80 shadow-md">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Banner Header with Image + Tag + Title + Date Overlay -->
+      <div id="forum-modal-header" class="relative w-full h-48 bg-slate-900 shrink-0 overflow-hidden">
+        <img id="forum-modal-img" class="w-full h-full object-cover" src="" alt="Banner">
+        <div class="absolute inset-0 bg-gradient-to-t from-[#0c101c] via-[#0c101c]/60 to-transparent"></div>
+
+        <div class="absolute bottom-4 left-6 right-6 flex flex-col gap-1.5 z-10">
+          <div class="flex items-center gap-2.5">
+            <span id="forum-modal-tag"
+              class="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold tracking-wider uppercase custom-accent-bg text-white shadow-md">Tag</span>
+            <span id="forum-modal-date" class="text-[11px] text-slate-300 font-ekkamaivibe">Date</span>
+          </div>
+          <h2 id="forum-modal-title" class="text-2xl font-black text-white font-nexon leading-snug line-clamp-2">Title
+          </h2>
+        </div>
+      </div>
+
+      <!-- Article Body (Markdown Parsed Container) -->
+      <div
+        class="p-6 overflow-y-auto flex-1 space-y-4 font-ekkamaivibe text-slate-200 text-sm leading-relaxed select-text"
+        id="forum-modal-body">
+        <!-- Rendered markdown & color code content goes here -->
+      </div>
+    </div>
+  </div>
+
   <!-- REPAIR CONFIRM MODAL -->
   <div id="repair-modal"
-    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-3xl">
     <div
       class="w-[400px] bg-[#0c101c] border border-slate-800/80 rounded-3xl p-7 shadow-2xl flex flex-col items-center text-center gap-5">
 
@@ -540,23 +783,22 @@
 
       <!-- Content -->
       <div class="space-y-2">
-        <h3 class="text-lg font-black text-white tracking-tight font-nexon">ลบข้อมูลเกม?</h3>
-        <p class="text-xs text-slate-400 leading-relaxed font-ekkamaivibe">
-          ระบบจะลบโฟลเดอร์เกมทั้งหมด<br>
-          <span class="text-rose-400/80 font-bold">(.the_new_launcher)</span><br>
-          และจะต้องดาวน์โหลดใหม่ตั้งแต่ต้น
+        <h3 class="text-lg font-black text-white tracking-tight font-nexon" data-i18n="repairConfirmTitle">Delete Game Data?</h3>
+        <p class="text-xs text-slate-400 leading-relaxed font-ekkamaivibe" data-i18n="repairConfirmDesc">
         </p>
       </div>
 
       <!-- Buttons -->
-      <div class="flex gap-3 w-full pt-1">
+      <div class="flex gap-3 w-full pt-1 font-nexon">
         <button id="btn-repair-cancel"
-          class="flex-1 py-3 px-4 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white font-bold text-sm rounded-2xl transition-all font-nexon">
-          ยกเลิก
+          class="flex-1 py-3 px-4 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white font-bold text-sm rounded-2xl transition-all"
+          data-i18n="btnCancel">
+          Cancel
         </button>
         <button id="btn-repair-confirm"
-          class="flex-1 py-3 px-4 bg-rose-600/80 hover:bg-rose-600 border border-rose-500/40 text-white font-black text-sm rounded-2xl shadow-lg transition-all font-nexon">
-          ลบออกเลย
+          class="flex-1 py-3 px-4 bg-rose-600/80 hover:bg-rose-600 border border-rose-500/40 text-white font-black text-sm rounded-2xl shadow-lg transition-all"
+          data-i18n="btnDeleteNow">
+          Delete Now
         </button>
       </div>
 
@@ -565,7 +807,7 @@
 
   <!-- UPDATE CHECK OVERLAY (Shown on startup) -->
   <div id="update-check-overlay"
-    class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-sm transition-opacity duration-300">
+    class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-sm transition-opacity duration-300 rounded-3xl overflow-hidden">
     <div class="flex flex-col items-center text-center gap-4">
       <!-- Loading Spinner -->
       <svg class="w-8 h-8 text-slate-400 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -576,7 +818,7 @@
       </svg>
       <!-- Status Text -->
       <div class="flex flex-col gap-1">
-        <p id="update-check-status-text" class="text-sm font-bold text-slate-200 font-nexon">กำลังตรวจสอบอัปเดต...</p>
+        <p id="update-check-status-text" class="text-sm font-bold text-slate-200 font-nexon">Checking for updates...</p>
         <p id="update-check-sub-text" class="text-xs text-slate-400 font-ekkamaivibe"></p>
       </div>
       <!-- Progress Bar -->
@@ -593,6 +835,12 @@
   <script src="src/i18n/translations.js"></script>
   <script src="src/config/appConfig.js"></script>
   <script src="src/app.js"></script>
+  <!-- Disable all native browser tooltips (title attributes) globally -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[title]').forEach(el => el.removeAttribute('title'));
+    });
+  </script>
 </body>
 
 </html>

@@ -46,16 +46,21 @@ class AppConfig {
   getDefaultUserSettings() {
     return {
       language: 'en',
-      maxRam: '4096',
+      maxRam: 4096,
+      fullscreen: false,
+      windowWidth: 854,
+      windowHeight: 480,
       autoConnect: true
     };
   }
 
   loadUserSettings() {
     try {
-      const saved = localStorage.getItem(this.STORAGE_KEY);
-      if (saved) {
-        return { ...this.getDefaultUserSettings(), ...JSON.parse(saved) };
+      if (typeof localStorage !== 'undefined') {
+        const saved = localStorage.getItem(this.STORAGE_KEY);
+        if (saved) {
+          return { ...this.getDefaultUserSettings(), ...JSON.parse(saved) };
+        }
       }
     } catch (e) {
       console.error('Failed to load user settings from storage:', e);
@@ -66,7 +71,9 @@ class AppConfig {
   saveUserSettings(newSettings) {
     this.userSettings = { ...this.userSettings, ...newSettings };
     try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.userSettings));
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.userSettings));
+      }
     } catch (e) {
       console.error('Failed to save user settings to storage:', e);
     }
@@ -147,6 +154,22 @@ class AppConfig {
 
   get language() {
     return this.userSettings.language || 'en';
+  }
+
+  get maxRam() {
+    return parseInt(this.userSettings.maxRam) || 4096;
+  }
+
+  get fullscreen() {
+    return !!this.userSettings.fullscreen;
+  }
+
+  get windowWidth() {
+    return parseInt(this.userSettings.windowWidth) || 854;
+  }
+
+  get windowHeight() {
+    return parseInt(this.userSettings.windowHeight) || 480;
   }
 }
 

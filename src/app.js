@@ -16,6 +16,15 @@ class AppUI {
       this.loadSettingsForm();
       this.updateUserDisplay();
       this.initAutoUpdater();
+      this.updatePlayButtonState();
+
+      if (window.require) {
+        const { ipcRenderer } = window.require('electron');
+        ipcRenderer.on('game-status-changed', (event, data) => {
+          this.isGameRunning = data.isRunning;
+          this.updatePlayButtonState();
+        });
+      }
 
       i18n.subscribe(() => {
         this.updateTranslations();
@@ -142,17 +151,17 @@ class AppUI {
 
       ipcRenderer.on('updater-message', (event, data) => {
         if (data.status === 'checking') {
-          if (statusText) statusText.innerText = 'กำลังตรวจสอบอัปเดต...';
+          if (statusText) statusText.innerText = 'Checking for updates...';
         } else if (data.status === 'available') {
-          if (statusText) statusText.innerText = 'พบอัปเดตใหม่ กำลังดาวน์โหลด...';
-          if (subText) subText.innerText = `เวอร์ชัน ${data.version}`;
+          if (statusText) statusText.innerText = 'New update found. Downloading...';
+          if (subText) subText.innerText = `Version ${data.version}`;
           if (progressWrap) progressWrap.classList.remove('hidden');
         } else if (data.status === 'not-available') {
-          if (statusText) statusText.innerText = 'Launcher เป็นเวอร์ชันล่าสุดแล้ว';
+          if (statusText) statusText.innerText = 'Launcher is up to date.';
           setTimeout(endUpdateCheck, 1000);
         } else if (data.status === 'error') {
-          if (statusText) statusText.innerText = 'ไม่สามารถตรวจสอบอัปเดตได้';
-          if (subText) subText.innerText = 'ข้ามขั้นตอนนี้และดำเนินการต่อ...';
+          if (statusText) statusText.innerText = 'Unable to check for updates.';
+          if (subText) subText.innerText = 'Skipping and continuing...';
           setTimeout(endUpdateCheck, 1500);
         }
       });
@@ -465,23 +474,97 @@ class AppUI {
       });
     }
 
+    // Settings RAM Slider live value display update & active preset highlighting
+    const ramInput = document.getElementById('setting-ram');
+    const ramVal = document.getElementById('setting-ram-val');
+
+    const updateRamPresetHighlight = (val) => {
+      document.querySelectorAll('.ram-preset-btn').forEach(btn => {
+        const pVal = btn.getAttribute('data-ram-preset');
+        if (String(pVal) === String(val)) {
+          btn.classList.add('custom-accent-bg', 'text-white', 'border-transparent');
+          btn.classList.remove('bg-slate-900', 'text-slate-300', 'border-slate-800');
+        } else {
+          btn.classList.remove('custom-accent-bg', 'text-white', 'border-transparent');
+          btn.classList.add('bg-slate-900', 'text-slate-300', 'border-slate-800');
+        }
+      });
+    };
+
+    if (ramInput && ramVal) {
+      ramInput.addEventListener('input', (e) => {
+        ramVal.innerText = e.target.value;
+        updateRamPresetHighlight(e.target.value);
+      });
+    }
+
+    const showSettingsSaved = () => {
+      // Silent save: no UI alert shown
+    };
+
+    const saveSettings = () => {
+      const lang = document.getElementById('setting-language')?.value || 'en';
+      const fullscreen = document.getElementById('setting-fullscreen')?.checked || false;
+      const width = parseInt(document.getElementById('setting-width')?.value) || 854;
+      const height = parseInt(document.getElementById('setting-height')?.value) || 480;
+      const maxRam = parseInt(document.getElementById('setting-ram')?.value) || 4096;
+
+      appConfig.saveUserSettings({
+        language: lang,
+        fullscreen: fullscreen,
+        windowWidth: width,
+        windowHeight: height,
+        maxRam: maxRam
+      });
+      i18n.setLanguage(lang);
+    };
+
+    let settingsSaveTimer = null;
+    const saveSettingsDebounced = () => {
+      if (settingsSaveTimer) clearTimeout(settingsSaveTimer);
+      settingsSaveTimer = setTimeout(saveSettings, 300);
+    };
+
     // Settings Save Action
     const formSettings = document.getElementById('form-settings');
     if (formSettings) {
       formSettings.addEventListener('submit', (e) => {
         e.preventDefault();
-        const lang = document.getElementById('setting-language').value;
-
-        appConfig.saveUserSettings({ language: lang });
-        i18n.setLanguage(lang);
-
-        const alertMsg = document.getElementById('settings-alert');
-        if (alertMsg) {
-          alertMsg.classList.remove('hidden');
-          setTimeout(() => alertMsg.classList.add('hidden'), 3000);
-        }
+        saveSettings();
       });
     }
+
+    // Auto-save settings when inputs change
+    const settingsInputs = [
+      document.getElementById('setting-language'),
+      document.getElementById('setting-fullscreen'),
+      document.getElementById('setting-width'),
+      document.getElementById('setting-height'),
+      document.getElementById('setting-ram')
+    ].filter(Boolean);
+
+    settingsInputs.forEach(input => {
+      const eventType = input.tagName.toLowerCase() === 'select' || input.type === 'checkbox' ? 'change' : 'input';
+      input.addEventListener(eventType, saveSettingsDebounced);
+
+      if (input.id === 'setting-width' || input.id === 'setting-height') {
+        input.addEventListener('input', (e) => {
+          e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+      }
+    });
+
+    document.querySelectorAll('.ram-preset-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const val = e.currentTarget.getAttribute('data-ram-preset');
+        if (ramInput && ramVal && val) {
+          ramInput.value = val;
+          ramVal.innerText = val;
+          updateRamPresetHighlight(val);
+          saveSettings();
+        }
+      });
+    });
 
     // Language Selector directly in settings
     const langSelect = document.getElementById('setting-language');
@@ -522,6 +605,14 @@ class AppUI {
       targetView.classList.remove('hidden');
     }
 
+    if (viewId === 'view-forum') {
+      this.loadForumDataIfNeeded();
+    } else if (viewId === 'view-store') {
+      this.loadStoreDataIfNeeded();
+    } else if (viewId === 'view-setting') {
+      this.loadSettingsForm();
+    }
+
     // Highlight active nav item
     document.querySelectorAll('[data-target-view]').forEach(btn => {
       const isTarget = btn.getAttribute('data-target-view') === viewId;
@@ -539,7 +630,50 @@ class AppUI {
 
   loadSettingsForm() {
     const langSelect = document.getElementById('setting-language');
+    const fullscreenCheckbox = document.getElementById('setting-fullscreen');
+    const widthInput = document.getElementById('setting-width');
+    const heightInput = document.getElementById('setting-height');
+    const ramInput = document.getElementById('setting-ram');
+    const ramVal = document.getElementById('setting-ram-val');
+    const ramMaxLabel = document.getElementById('setting-ram-max-label');
+    const settingVersionEl = document.getElementById('setting-app-version');
+
     if (langSelect) langSelect.value = i18n.getLanguage();
+    if (fullscreenCheckbox) fullscreenCheckbox.checked = appConfig.fullscreen;
+    if (widthInput) widthInput.value = appConfig.windowWidth;
+    if (heightInput) heightInput.value = appConfig.windowHeight;
+    if (ramInput) ramInput.value = appConfig.maxRam;
+    if (ramVal) ramVal.innerText = appConfig.maxRam;
+
+    // Highlight preset button matching current RAM
+    const currentRamStr = String(appConfig.maxRam);
+    document.querySelectorAll('.ram-preset-btn').forEach(btn => {
+      const pVal = btn.getAttribute('data-ram-preset');
+      if (String(pVal) === currentRamStr) {
+        btn.classList.add('custom-accent-bg', 'text-white', 'border-transparent');
+        btn.classList.remove('bg-slate-900', 'text-slate-300', 'border-slate-800');
+      } else {
+        btn.classList.remove('custom-accent-bg', 'text-white', 'border-transparent');
+        btn.classList.add('bg-slate-900', 'text-slate-300', 'border-slate-800');
+      }
+    });
+
+    // Detect system max RAM & version via Electron if available
+    if (window.require) {
+      const { ipcRenderer } = window.require('electron');
+      ipcRenderer.invoke('get-app-version').then(version => {
+        if (settingVersionEl) settingVersionEl.innerText = version;
+      }).catch(() => { });
+
+      try {
+        const os = window.require('os');
+        const totalMemMB = Math.floor(os.totalmem() / (1024 * 1024));
+        if (ramInput && totalMemMB > 1024) {
+          ramInput.max = totalMemMB;
+          if (ramMaxLabel) ramMaxLabel.innerText = `${totalMemMB} MB`;
+        }
+      } catch (e) { }
+    }
   }
 
   updateUserDisplay() {
@@ -682,6 +816,41 @@ class AppUI {
     }, 15000);
   }
 
+  async updatePlayButtonState() {
+    const btn = document.getElementById('btn-launch-game');
+    const textLabel = document.getElementById('launch-btn-text');
+    const iconPlay = document.getElementById('launch-btn-icon-play');
+    const iconSpinner = document.getElementById('launch-btn-icon-spinner');
+
+    if (!btn || !textLabel) return;
+
+    if (this.isGameRunning) {
+      btn.disabled = true;
+      btn.classList.add('bg-slate-700', 'text-slate-300', 'cursor-not-allowed', 'opacity-80');
+      btn.classList.remove('custom-accent-bg', 'hover:opacity-95', 'bg-amber-500', 'text-slate-950', 'text-white');
+      if (iconPlay) iconPlay.classList.add('hidden');
+      if (iconSpinner) iconSpinner.classList.add('hidden');
+      textLabel.innerText = i18n.t('gameRunning');
+    } else {
+      btn.disabled = false;
+      btn.classList.remove('bg-amber-500', 'text-slate-950', 'bg-slate-700', 'text-slate-300', 'cursor-not-allowed', 'opacity-70', 'opacity-80', 'opacity-90');
+      btn.classList.add('custom-accent-bg', 'text-white', 'hover:opacity-95');
+      if (iconPlay) iconPlay.classList.remove('hidden');
+
+      if (window.require) {
+        try {
+          const { ipcRenderer } = window.require('electron');
+          const exists = await ipcRenderer.invoke('check-namespace-exists', appConfig.gameFolderNamespace);
+          if (!exists) {
+            textLabel.innerText = i18n.t('installGame');
+            return;
+          }
+        } catch (e) { }
+      }
+      textLabel.innerText = i18n.t('playNow');
+    }
+  }
+
   simulateLaunchGame() {
     const btn = document.getElementById('btn-launch-game');
     const progressBar = document.getElementById('launch-progress-bar');
@@ -690,7 +859,7 @@ class AppUI {
     const textLabel = document.getElementById('launch-btn-text');
     const statusTextLabel = document.getElementById('launch-status-text');
 
-    if (!btn || btn.disabled) return;
+    if (!btn || btn.disabled || this.isGameRunning) return;
 
     btn.disabled = true;
     if (iconPlay) iconPlay.classList.add('hidden');
@@ -706,7 +875,11 @@ class AppUI {
         username: this.currentUser ? this.currentUser.name : 'Player',
         uuid: this.currentUser ? this.currentUser.uuid : null,
         accessToken: this.currentUser ? this.currentUser.accessToken : null,
-        password: this.currentUser ? this.currentUser.password : null
+        password: this.currentUser ? this.currentUser.password : null,
+        maxRam: appConfig.maxRam,
+        fullscreen: appConfig.fullscreen,
+        windowWidth: appConfig.windowWidth,
+        windowHeight: appConfig.windowHeight
       };
 
       const progressListener = (event, data) => {
@@ -719,11 +892,11 @@ class AppUI {
         // Clean short text inside button
         if (textLabel) {
           if (data.status === 'launched') {
-            textLabel.innerText = 'กำลังเปิดเกม...';
+            textLabel.innerText = i18n.t('gameRunning');
           } else if (data.status === 'error') {
-            textLabel.innerText = 'เกิดข้อผิดพลาด';
+            textLabel.innerText = i18n.t('errApiConnection');
           } else {
-            textLabel.innerText = `กำลังดาวน์โหลด ${percent}%`;
+            textLabel.innerText = `${i18n.t('downloadingText') || 'DOWNLOADING'} ${percent}%`;
           }
         }
 
@@ -731,13 +904,18 @@ class AppUI {
           ipcRenderer.removeListener('launch-progress', progressListener);
 
           setTimeout(() => {
-            btn.disabled = false;
             if (progressBar) progressBar.style.width = '0%';
-            if (iconPlay) iconPlay.classList.remove('hidden');
             if (iconSpinner) iconSpinner.classList.add('hidden');
-            if (textLabel) textLabel.innerText = i18n.t('playNow');
             if (statusTextLabel) statusTextLabel.innerText = '';
-          }, 3500);
+
+            if (data.status === 'launched') {
+              this.isGameRunning = true;
+            } else {
+              this.isGameRunning = false;
+              btn.disabled = false;
+            }
+            this.updatePlayButtonState();
+          }, 2000);
         }
       };
 
@@ -790,14 +968,15 @@ class AppUI {
     if (btnConfirm) {
       btnConfirm.onclick = async () => {
         repairModal.classList.add('hidden');
-        if (statusTextLabel) statusTextLabel.innerText = '🗑️ กำลังลบโฟลเดอร์เกม...';
+        if (statusTextLabel) statusTextLabel.innerText = '🗑️ Deleting game folder...';
 
         const { ipcRenderer } = window.require('electron');
         ipcRenderer.invoke('delete-namespace-folder').then((result) => {
           if (result && result.success) {
-            if (statusTextLabel) statusTextLabel.innerText = '✅ ลบเรียบร้อยแล้ว — กดเริ่มเกมเพื่อติดตั้งใหม่';
+            if (statusTextLabel) statusTextLabel.innerText = '✅ Deleted — Press Play to re-install the game.';
+            this.updatePlayButtonState();
           } else {
-            if (statusTextLabel) statusTextLabel.innerText = `❌ ลบไม่สำเร็จ: ${result?.error || 'unknown error'}`;
+            if (statusTextLabel) statusTextLabel.innerText = `❌ Delete failed: ${result?.error || 'unknown error'}`;
           }
           setTimeout(() => {
             if (statusTextLabel) statusTextLabel.innerText = '';
@@ -821,6 +1000,546 @@ class AppUI {
     });
 
     this.updateUserDisplay();
+    this.updatePlayButtonState();
+  }
+
+  // --- FORUM MODULE METHODS ---
+
+  loadForumDataIfNeeded() {
+    if (!this.forumPosts) {
+      this.fetchForumData();
+    }
+  }
+
+  loadStoreDataIfNeeded() {
+    if (!this.storeItems) {
+      this.fetchStoreData();
+    }
+  }
+
+  async fetchStoreData() {
+    const loadingEl = document.getElementById('store-loading');
+    const emptyEl = document.getElementById('store-empty');
+    const gridEl = document.getElementById('store-grid');
+
+    if (loadingEl) loadingEl.classList.remove('hidden');
+    if (emptyEl) emptyEl.classList.add('hidden');
+    if (gridEl) gridEl.innerHTML = '';
+
+    try {
+      const endpoint = `${appConfig.apiDomain}/api/store`;
+      const response = await fetch(endpoint);
+      if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+
+      const data = await response.json();
+      this.storeItems = Array.isArray(data) ? data : [];
+      this.storeCurrentPage = 0;
+      this.storeItemsPerPage = 6;
+      this.bindStoreEvents();
+      this.renderStoreItems();
+    } catch (error) {
+      console.error('Failed to fetch store data:', error);
+      this.storeItems = [];
+      if (emptyEl) {
+        emptyEl.innerText = 'Failed to load hot store items. Please check your API server connection.';
+        emptyEl.classList.remove('hidden');
+      }
+      if (gridEl) gridEl.innerHTML = '';
+      const totalCountEl = document.getElementById('store-total-count');
+      if (totalCountEl) totalCountEl.innerText = '0 items total';
+      const pageIndicator = document.getElementById('store-page-indicator');
+      if (pageIndicator) pageIndicator.innerText = 'Page 1 / 1';
+    } finally {
+      if (loadingEl) loadingEl.classList.add('hidden');
+    }
+  }
+
+  bindStoreEvents() {
+    if (this.storeEventsBound) return;
+    this.storeEventsBound = true;
+
+    const prevBtn = document.getElementById('store-prev-page');
+    const nextBtn = document.getElementById('store-next-page');
+    const container = document.getElementById('store-container');
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        if (this.storeCurrentPage > 0) {
+          this.storeCurrentPage--;
+          this.renderStoreItems();
+        }
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil((this.storeItems?.length || 0) / (this.storeItemsPerPage || 6)) || 1;
+        if (this.storeCurrentPage < totalPages - 1) {
+          this.storeCurrentPage++;
+          this.renderStoreItems();
+        }
+      });
+    }
+
+    if (container) {
+      let isWheelThrottled = false;
+      container.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        if (isWheelThrottled) return;
+        const totalPages = Math.ceil((this.storeItems?.length || 0) / (this.storeItemsPerPage || 6)) || 1;
+
+        if (e.deltaY > 0) {
+          if (this.storeCurrentPage < totalPages - 1) {
+            isWheelThrottled = true;
+            this.storeCurrentPage++;
+            this.renderStoreItems();
+            setTimeout(() => { isWheelThrottled = false; }, 250);
+          }
+        } else if (e.deltaY < 0) {
+          if (this.storeCurrentPage > 0) {
+            isWheelThrottled = true;
+            this.storeCurrentPage--;
+            this.renderStoreItems();
+            setTimeout(() => { isWheelThrottled = false; }, 250);
+          }
+        }
+      }, { passive: false });
+    }
+  }
+
+  renderStoreItems() {
+    const gridEl = document.getElementById('store-grid');
+    const emptyEl = document.getElementById('store-empty');
+
+    if (!gridEl) return;
+
+    const items = this.storeItems || [];
+    const totalCount = items.length;
+    const itemsPerPage = this.storeItemsPerPage || 6;
+    const totalPages = Math.ceil(totalCount / itemsPerPage) || 1;
+    let currentPage = this.storeCurrentPage || 0;
+
+    if (currentPage >= totalPages) currentPage = totalPages - 1;
+    if (currentPage < 0) currentPage = 0;
+    this.storeCurrentPage = currentPage;
+
+    const startIdx = currentPage * itemsPerPage;
+    const pageItems = items.slice(startIdx, startIdx + itemsPerPage);
+
+    if (totalCount === 0) {
+      gridEl.innerHTML = '';
+      if (emptyEl) emptyEl.classList.remove('hidden');
+      return;
+    }
+
+    if (emptyEl) emptyEl.classList.add('hidden');
+
+    gridEl.style.opacity = '0';
+    setTimeout(() => {
+      gridEl.innerHTML = '';
+      pageItems.forEach(item => {
+        const card = (item.title || item.description || item.tag)
+          ? this.createForumCard(item)
+          : this.createStoreCard(item);
+        gridEl.appendChild(card);
+      });
+      gridEl.style.opacity = '1';
+    }, 120);
+  }
+
+  createStoreCard(item) {
+    const card = document.createElement('div');
+    card.className = 'bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800/80 hover:border-slate-700 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-200 cursor-pointer flex flex-col group h-full';
+
+    const defaultImg = 'assets/bg.png';
+    const imageUrl = item.image_url || item.image || defaultImg;
+    const itemName = item.name || item.title || `Item #${item.id || 'N/A'}`;
+    const itemPrice = item.price != null ? Number(item.price).toFixed(2) : 'N/A';
+
+    card.innerHTML = `
+      <div class="h-32 w-full relative overflow-hidden bg-slate-950 shrink-0">
+        <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="${imageUrl}" alt="${itemName}" onerror="this.src='${defaultImg}'">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-transparent to-transparent"></div>
+      </div>
+      <div class="p-4 flex-1 flex flex-col justify-between">
+        <div>
+          <h3 class="text-sm font-bold text-white font-nexon line-clamp-2 leading-snug">${itemName}</h3>
+          <p class="text-[11px] text-slate-400 font-ekkamaivibe mt-2 leading-snug">ID: ${item.id || 'N/A'}</p>
+        </div>
+        <div class="mt-4 flex items-center justify-between text-xs text-slate-300 font-semibold font-nexon">
+          <span class="text-emerald-300">฿ ${itemPrice}</span>
+          <span class="text-slate-500">Hot item</span>
+        </div>
+      </div>
+    `;
+
+    return card;
+  }
+
+  async fetchForumData() {
+    const loadingEl = document.getElementById('forum-loading');
+    const emptyEl = document.getElementById('forum-empty');
+    const gridEl = document.getElementById('forum-grid');
+
+    if (loadingEl) loadingEl.classList.remove('hidden');
+    if (emptyEl) emptyEl.classList.add('hidden');
+    if (gridEl) gridEl.innerHTML = '';
+
+    try {
+      const endpoint = `${appConfig.apiDomain}/api/forum`;
+      const response = await fetch(endpoint);
+      if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+      const data = await response.json();
+
+      this.forumPosts = Array.isArray(data) ? data : [];
+      this.forumCurrentPage = 0;
+      this.forumItemsPerPage = 6;
+      this.bindForumEvents();
+      this.renderForumPage();
+    } catch (error) {
+      console.error('Failed to fetch forum data:', error);
+      this.forumPosts = [];
+      if (emptyEl) {
+        emptyEl.innerText = 'Failed to load forum data. Please check your API server connection.';
+        emptyEl.classList.remove('hidden');
+      }
+    } finally {
+      if (loadingEl) loadingEl.classList.add('hidden');
+    }
+  }
+
+  bindForumEvents() {
+    if (this.forumEventsBound) return;
+    this.forumEventsBound = true;
+
+    const prevBtn = document.getElementById('forum-prev-page');
+    const nextBtn = document.getElementById('forum-next-page');
+    const container = document.getElementById('forum-container');
+    const modalClose = document.getElementById('forum-modal-close');
+    const modal = document.getElementById('forum-modal');
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        if (this.forumCurrentPage > 0) {
+          this.forumCurrentPage--;
+          this.renderForumPage();
+        }
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil((this.forumPosts?.length || 0) / (this.forumItemsPerPage || 6)) || 1;
+        if (this.forumCurrentPage < totalPages - 1) {
+          this.forumCurrentPage++;
+          this.renderForumPage();
+        }
+      });
+    }
+
+    if (container) {
+      let isWheelThrottled = false;
+      container.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        if (isWheelThrottled) return;
+        const totalPages = Math.ceil((this.forumPosts?.length || 0) / (this.forumItemsPerPage || 6)) || 1;
+
+        if (e.deltaY > 0) {
+          // Scroll Down -> Next 6 items
+          if (this.forumCurrentPage < totalPages - 1) {
+            isWheelThrottled = true;
+            this.forumCurrentPage++;
+            this.renderForumPage();
+            setTimeout(() => { isWheelThrottled = false; }, 250);
+          }
+        } else if (e.deltaY < 0) {
+          // Scroll Up -> Prev 6 items
+          if (this.forumCurrentPage > 0) {
+            isWheelThrottled = true;
+            this.forumCurrentPage--;
+            this.renderForumPage();
+            setTimeout(() => { isWheelThrottled = false; }, 250);
+          }
+        }
+      }, { passive: false });
+    }
+
+    if (modalClose && modal) {
+      modalClose.addEventListener('click', () => {
+        modal.classList.add('hidden');
+      });
+
+      // Close modal on backdrop click
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.add('hidden');
+        }
+      });
+    }
+  }
+
+  renderForumPage() {
+    const gridEl = document.getElementById('forum-grid');
+    const pageIndicator = document.getElementById('forum-page-indicator');
+    const totalCountEl = document.getElementById('forum-total-count');
+    const prevBtn = document.getElementById('forum-prev-page');
+    const nextBtn = document.getElementById('forum-next-page');
+    const emptyEl = document.getElementById('forum-empty');
+
+    if (!gridEl) return;
+
+    const posts = this.forumPosts || [];
+    const totalItems = posts.length;
+    const itemsPerPage = this.forumItemsPerPage || 6;
+    const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+    if (this.forumCurrentPage >= totalPages) this.forumCurrentPage = totalPages - 1;
+    if (this.forumCurrentPage < 0) this.forumCurrentPage = 0;
+
+    const currentPage = this.forumCurrentPage;
+    const startIdx = currentPage * itemsPerPage;
+    const pagePosts = posts.slice(startIdx, startIdx + itemsPerPage);
+
+    if (pageIndicator) pageIndicator.innerText = `Page ${currentPage + 1} / ${totalPages}`;
+    if (totalCountEl) totalCountEl.innerText = `${totalItems} post${totalItems !== 1 ? 's' : ''} total`;
+    if (prevBtn) prevBtn.disabled = (currentPage === 0);
+    if (nextBtn) nextBtn.disabled = (currentPage >= totalPages - 1);
+
+    if (totalItems === 0) {
+      gridEl.innerHTML = '';
+      if (emptyEl) emptyEl.classList.remove('hidden');
+      return;
+    } else if (emptyEl) {
+      emptyEl.classList.add('hidden');
+    }
+
+    // Grid animation: fade out and in
+    gridEl.style.opacity = '0';
+
+    setTimeout(() => {
+      gridEl.innerHTML = '';
+      pagePosts.forEach(post => {
+        const card = this.createForumCard(post);
+        gridEl.appendChild(card);
+      });
+      gridEl.style.opacity = '1';
+    }, 120);
+  }
+
+  createForumCard(post) {
+    const card = document.createElement('div');
+    card.className = 'bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800/80 hover:border-slate-700 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-200 cursor-pointer flex flex-col group h-full';
+
+    // Image Header fallback
+    const defaultImg = 'assets/bg.png';
+    const imageUrl = post.image_url || defaultImg;
+
+    // Tag background colors
+    const tagColors = {
+      'Game Releases': 'custom-accent-bg',
+      'Community': 'bg-emerald-600',
+      'Competitions': 'bg-amber-600',
+      'The Buzz': 'bg-sky-600'
+    };
+    const tagClass = tagColors[post.tag] || 'custom-accent-bg';
+
+    // Clean preview description by stripping markdown tags
+    const cleanSnippet = (post.description || '')
+      .replace(/\{#[a-fA-F0-9]{3,6}\}/g, '')
+      .replace(/\{#\}/g, '')
+      .replace(/[#*`~>-]/g, '')
+      .replace(/!\[.*?\]\(.*?\)/g, '')
+      .replace(/\[.*?\]\(.*?\)/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    // Format date
+    let dateStr = '';
+    if (post.created_at) {
+      try {
+        const d = new Date(post.created_at);
+        dateStr = d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+      } catch (e) {
+        dateStr = post.created_at;
+      }
+    }
+
+    card.innerHTML = `
+      <div class="h-24 w-full relative overflow-hidden bg-slate-950 shrink-0">
+        <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="${imageUrl}" alt="${post.title || ''}" onerror="this.src='${defaultImg}'">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+        <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider text-white ${tagClass} shadow-md">${post.tag || 'Notice'}</span>
+      </div>
+      <div class="p-3 flex-1 flex flex-col justify-between overflow-hidden">
+        <div>
+          <h3 class="text-xs font-bold text-white font-nexon line-clamp-1 group-hover:custom-accent-text transition-colors leading-snug">${post.title || ''}</h3>
+          <p class="text-[11px] text-slate-400 font-ekkamaivibe line-clamp-2 mt-1 leading-snug">${cleanSnippet}</p>
+        </div>
+        <div class="text-[10px] text-slate-500 font-ekkamaivibe mt-2 text-right">
+          ${dateStr}
+        </div>
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      this.openForumModal(post);
+    });
+
+    return card;
+  }
+
+  openForumModal(post) {
+    const modal = document.getElementById('forum-modal');
+    const modalImg = document.getElementById('forum-modal-img');
+    const modalTag = document.getElementById('forum-modal-tag');
+    const modalDate = document.getElementById('forum-modal-date');
+    const modalTitle = document.getElementById('forum-modal-title');
+    const modalBody = document.getElementById('forum-modal-body');
+
+    if (!modal) return;
+
+    if (modalImg) {
+      modalImg.src = post.image_url || 'assets/bg.png';
+      modalImg.onerror = () => { modalImg.src = 'assets/bg.png'; };
+    }
+    if (modalTag) modalTag.innerText = post.tag || 'Notice';
+    if (modalDate) {
+      let dStr = '';
+      if (post.created_at) {
+        try {
+          const d = new Date(post.created_at);
+          dStr = d.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        } catch (e) {
+          dStr = post.created_at;
+        }
+      }
+      modalDate.innerText = dStr;
+    }
+    if (modalTitle) modalTitle.innerText = post.title || '';
+    if (modalBody) {
+      modalBody.innerHTML = this.parseMarkdownToHTML(post.description || '');
+    }
+
+    modal.classList.remove('hidden');
+  }
+
+  parseMarkdownToHTML(markdown) {
+    if (!markdown) return '';
+
+    let html = markdown;
+
+    // Escape HTML entities to prevent XSS except our allowed markup
+    html = html
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Minecraft Custom Color Codes: {#HEX}text{#} -> <span style="color:#HEX">text</span>
+    html = html.replace(/\{#([a-fA-F0-9]{3,6})\}(.*?)\{#\}/g, (match, color, text) => {
+      return `<span style="color: #${color}; font-weight: 600;">${text}</span>`;
+    });
+
+    // Code blocks ```lang ... ```
+    html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
+      return `<pre class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs font-mono text-emerald-400 overflow-x-auto my-2"><code>${code.trim()}</code></pre>`;
+    });
+
+    // Inline code `code`
+    html = html.replace(/`([^`]+)`/g, '<code class="bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800 text-xs font-mono custom-accent-text">$1</code>');
+
+    // YouTube / Image links: [![alt](img_url)](youtube_url)
+    html = html.replace(/\[!\[(.*?)\]\((.*?)\)\]\((.*?)\)/g, (match, alt, img, link) => {
+      return `<a href="${link}" target="_blank" class="block my-3 rounded-xl overflow-hidden border border-slate-800 hover:border-slate-700 transition-all relative group">
+        <img src="${img}" alt="${alt}" class="w-full max-h-56 object-cover">
+        <div class="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-all">
+          <div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center text-white shadow-lg">
+            <svg class="w-6 h-6 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+        </div>
+      </a>`;
+    });
+
+    // Standard Markdown Images: ![alt](url)
+    html = html.replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" class="w-full max-h-64 object-cover rounded-xl border border-slate-800 my-3">');
+
+    // Standard Links: [text](url)
+    html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" class="custom-accent-text underline font-semibold hover:opacity-80">$1</a>');
+
+    // Headers (# Heading)
+    html = html.replace(/^#### (.*$)/gim, '<h4 class="text-xs font-bold text-white font-nexon mt-3 mb-1">$1</h4>');
+    html = html.replace(/^### (.*$)/gim, '<h3 class="text-sm font-bold text-white font-nexon mt-3 mb-1.5">$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h2 class="text-base font-extrabold text-white font-nexon mt-4 mb-2 border-b border-slate-800 pb-1">$1</h2>');
+    html = html.replace(/^# (.*$)/gim, '<h1 class="text-lg font-black text-white font-nexon mt-4 mb-2 border-b border-slate-800/80 pb-1.5">$1</h1>');
+
+    // Horizontal rules (---)
+    html = html.replace(/^---$/gim, '<hr class="border-slate-800 my-3">');
+
+    // Task lists: - [x] or - [ ]
+    html = html.replace(/^- \[x\] (.*$)/gim, '<div class="flex items-center gap-2 text-xs text-emerald-400 my-1"><span class="w-4 h-4 rounded bg-emerald-500/20 border border-emerald-500 flex items-center justify-center text-[10px]">✓</span><span class="line-through text-slate-400">$1</span></div>');
+    html = html.replace(/^- \[ \] (.*$)/gim, '<div class="flex items-center gap-2 text-xs text-slate-300 my-1"><span class="w-4 h-4 rounded border border-slate-700 bg-slate-900"></span><span>$1</span></div>');
+
+    // Unordered lists (* or -)
+    html = html.replace(/^\* (.*$)/gim, '<li class="ml-4 list-disc text-xs text-slate-300 my-0.5">$1</li>');
+    html = html.replace(/^- (.*$)/gim, '<li class="ml-4 list-disc text-xs text-slate-300 my-0.5">$1</li>');
+
+    // Blockquotes (> quote)
+    html = html.replace(/^&gt; (.*$)/gim, '<blockquote class="border-l-4 border-purple-500 pl-3 py-1 bg-slate-950/60 text-xs italic text-slate-300 my-2 rounded-r-lg">$1</blockquote>');
+
+    // Bold, Italic, Strikethrough
+    html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong class="font-extrabold italic text-white">$1</strong>');
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1</strong>');
+    html = html.replace(/\*(.*?)\*/g, '<em class="italic text-slate-200">$1</em>');
+    html = html.replace(/~~(.*?)~~/g, '<del class="line-through text-slate-500">$1</del>');
+
+    // Tables parsing
+    if (html.includes('|')) {
+      const lines = html.split('\n');
+      let inTable = false;
+      let tableHTML = '<div class="overflow-x-auto my-3"><table class="w-full text-xs text-left border-collapse border border-slate-800 rounded-xl overflow-hidden">';
+      let newLines = [];
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line.startsWith('|') && line.endsWith('|')) {
+          if (!inTable) {
+            inTable = true;
+          }
+          if (line.includes('---')) continue;
+
+          const cells = line.split('|').slice(1, -1).map(c => c.trim());
+          const isHeader = !tableHTML.includes('<tbody>') && !tableHTML.includes('</td>');
+
+          if (isHeader) {
+            tableHTML += '<thead class="bg-slate-900 border-b border-slate-800 text-slate-200 font-nexon"><tr>';
+            cells.forEach(cell => { tableHTML += `<th class="p-2 border-r border-slate-800/60">${cell}</th>`; });
+            tableHTML += '</tr></thead><tbody>';
+          } else {
+            tableHTML += '<tr class="border-b border-slate-800/60 hover:bg-slate-900/50 transition-colors">';
+            cells.forEach(cell => { tableHTML += `<td class="p-2 border-r border-slate-800/60 text-slate-300">${cell}</td>`; });
+            tableHTML += '</tr>';
+          }
+        } else {
+          if (inTable) {
+            inTable = false;
+            tableHTML += '</tbody></table></div>';
+            newLines.push(tableHTML);
+            tableHTML = '<div class="overflow-x-auto my-3"><table class="w-full text-xs text-left border-collapse border border-slate-800 rounded-xl overflow-hidden">';
+          }
+          newLines.push(line);
+        }
+      }
+      if (inTable) {
+        tableHTML += '</tbody></table></div>';
+        newLines.push(tableHTML);
+      }
+      html = newLines.join('\n');
+    }
+
+    // Convert line breaks
+    html = html.replace(/\n\n/g, '<div class="h-2"></div>');
+    html = html.replace(/\n/g, '<br>');
+
+    return html;
   }
 }
 

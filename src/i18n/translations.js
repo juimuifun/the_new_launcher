@@ -40,6 +40,9 @@ const translations = {
     
     // Home Page
     playNow: "PLAY NOW",
+    installGame: "INSTALL",
+    gameRunning: "GAME RUNNING",
+    downloadingText: "DOWNLOADING",
     btnRepairLauncher: "Repair Launcher & Client",
     serverStatus: "Server Status",
     online: "Online",
@@ -53,8 +56,8 @@ const translations = {
     readyToPlay: "Ready to jump into the adventure?",
 
     // Setting Page
-    settingTitle: "Launcher Configuration",
-    settingSubtitle: "Manage your launcher API backend, language, and client options",
+    settingTitle: "Launcher Settings",
+    settingSubtitle: "Configure window size, memory allocation, and interface language",
     secGeneral: "General Settings",
     secApi: "API & Web Server",
     labelLanguage: "Interface Language",
@@ -73,7 +76,14 @@ const translations = {
     // Repair Modal
     repairModalTitle: "System Repair",
     repairModalDesc: "Checking and repairing launcher & game client files...",
+    repairConfirmTitle: "Delete Game Data?",
+    repairConfirmDesc: "This will permanently delete the entire game folder and the game will need to be re-downloaded from scratch.",
+    btnCancel: "Cancel",
+    btnDeleteNow: "Delete Now",
     btnClose: "OK",
+
+    // Forum Page
+    forumSubtitle: "News, announcements, and server updates",
   },
   th: {
     appTitle: "ตัวรันใหม่",
@@ -116,6 +126,9 @@ const translations = {
     
     // Home Page
     playNow: "เริ่มเกม",
+    installGame: "ติดตั้ง",
+    gameRunning: "เกมกำลังเปิดอยู่",
+    downloadingText: "กำลังดาวน์โหลด",
     btnRepairLauncher: "ซ่อมแซม Launcher และตัวเกม",
     serverStatus: "สถานะเซิร์ฟเวอร์",
     online: "เปิดใช้งาน",
@@ -129,8 +142,8 @@ const translations = {
     readyToPlay: "พร้อมสำหรับการผจญภัยหรือยัง?",
 
     // Setting Page
-    settingTitle: "ตั้งค่า Launcher",
-    settingSubtitle: "จัดการโดเมน Web API ภาษา และตัวเลือกการทำงาน",
+    settingTitle: "ตั้งค่าตัวเรียกใช้งาน",
+    settingSubtitle: "ตั้งค่าขนาดหน้าต่าง, หน่วยความจำ และภาษาจัดแสดง",
     secGeneral: "การตั้งค่าทั่วไป",
     secApi: "การเชื่อมต่อ API & Web Server",
     labelLanguage: "ภาษาของเมนู",
@@ -149,7 +162,14 @@ const translations = {
     // Repair Modal
     repairModalTitle: "ซ่อมแซมระบบ",
     repairModalDesc: "ระบบกำลังทำการตรวจสอบและซ่อมแซมไฟล์เกม / Launcher...",
+    repairConfirmTitle: "ลบข้อมูลเกม?",
+    repairConfirmDesc: "การดำเนินการนี้จะลบโฟลเดอร์เกมทั้งหมดอย่างถาวร และต้องดาวน์โหลดเกมใหม่ตั้งแต่ต้น",
+    btnCancel: "ยกเลิก",
+    btnDeleteNow: "ลบตอนนี้",
     btnClose: "ตกลง",
+
+    // Forum Page
+    forumSubtitle: "News, announcements, and server updates",
   }
 };
 

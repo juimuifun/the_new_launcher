@@ -6,7 +6,7 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #0b0f19;
+  background-color: transparent !important;
   color: #f8fafc;
   user-select: none;
   height: 100vh;
@@ -182,4 +182,43 @@ body {
   font-size: 0.875rem;
   color: #94a3b8;
   line-height: 1.4;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: none;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+  width: 0;
+  opacity: 0;
+}
+
+input[type=number]:focus {
+  outline: none;
+  -moz-appearance: textfield;
+  appearance: none;
+}
+
+select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background-color: #0f172a;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
+}
+
+select::-ms-expand {
+  display: none;
+}
+
+select option {
+  font-family: inherit;
 }
