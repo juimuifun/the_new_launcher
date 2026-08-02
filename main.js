@@ -124,15 +124,19 @@ ipcMain.on('launch-game', async (event, userPayload) => {
     const apiDomain = userPayload.apiDomain || 'http://localhost:3000';
     const folderNamespace = (userPayload.gameFolderNamespace || 'the_new_launcher').replace(/^\.+/, '');
 
-    // ตำแหน่งโฟลเดอร์เก็บไฟล์เกมตามมาตรฐาน Minecraft (%APPDATA%\.namespace)
+    // Game directory path (e.g., %APPDATA%/.the_new_launcher)
     const rootPath = path.join(app.getPath('appData'), `.${folderNamespace}`);
 
-    // ป้องกันปัญหา ENOTDIR โดยการการันตีว่า rootPath เป็นไดเรกทอรีเสมอ
+    // Prevent ENOTDIR by ensuring rootPath is always a directory
     if (fs.existsSync(rootPath)) {
-      const rootStat = fs.statSync(rootPath);
-      if (!rootStat.isDirectory()) {
-        fs.unlinkSync(rootPath);
-        fs.mkdirSync(rootPath, { recursive: true });
+      try {
+        const rootStat = fs.statSync(rootPath);
+        if (!rootStat.isDirectory()) {
+          fs.unlinkSync(rootPath); // Delete if it's a file
+          fs.mkdirSync(rootPath, { recursive: true });
+        }
+      } catch (e) {
+        fs.mkdirSync(rootPath, { recursive: true }); // Recreate if stat fails
       }
     } else {
       fs.mkdirSync(rootPath, { recursive: true });
@@ -441,10 +445,11 @@ ipcMain.on('window-close', () => {
 });
 
 // ลบโฟลเดอร์ namespace เกม (ใช้สำหรับติดตั้งใหม่)
-ipcMain.handle('delete-namespace-folder', async (event, payload) => {
+ipcMain.handle('delete-namespace-folder', async (event) => {
   try {
-    const folderNamespace = payload?.gameFolderNamespace || 'the_new_launcher';
-    const cleanNamespace = folderNamespace.replace(/^\.+/, '');
+    const { BUILD_CONFIG } = require('./src/config/appConfig');
+    const gameFolderNamespace = BUILD_CONFIG.gameFolderNamespace || '.the_new_launcher';
+    const cleanNamespace = gameFolderNamespace.replace(/^\.+/, '');
     const rootPath = path.join(app.getPath('appData'), `.${cleanNamespace}`);
     console.log(`[Repair] Deleting namespace folder: ${rootPath}`);
     if (fs.existsSync(rootPath)) {
@@ -476,20 +481,23 @@ async function downloadCustomServerFiles(apiDomain, rootPath, onProgress) {
   const path = require('path');
   const crypto = require('crypto');
 
-  // ฟังก์ชันช่วยเหลือในการสร้างไดเรกทอรีอย่างปลอดภัย (หากมีไฟล์ชื่อซ้ำขวางอยู่ จะลบไฟล์ทิ้งเพื่อเปิดทางให้สร้างไดเรกทอรีได้)
+  // Helper to ensure a directory exists, deleting any file that might be in the way.
   const ensureDirSafe = (dirPath) => {
     try {
       if (fs.existsSync(dirPath)) {
         const stat = fs.statSync(dirPath);
         if (!stat.isDirectory()) {
+          console.warn(`[DirCheck] Path exists but is a file, removing: ${dirPath}`);
           fs.unlinkSync(dirPath);
           fs.mkdirSync(dirPath, { recursive: true });
         }
       } else {
         fs.mkdirSync(dirPath, { recursive: true });
       }
-    } catch (e) {
-      console.warn(`[DirCheck] Could not ensure directory ${dirPath}:`, e.message);
+    } catch (err) {
+      console.warn(`[DirCheck] Could not ensure directory ${dirPath}:`, err.message);
+      // If all else fails, try to create it again.
+      if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
     }
   };
 
@@ -524,7 +532,7 @@ async function downloadCustomServerFiles(apiDomain, rootPath, onProgress) {
     // 1. สแกนและลบไฟล์แปลกปลอมในโฟลเดอร์ mods ที่ไม่อยู่ในรายการ manifest.json
     const allowedModPaths = new Set(
       files
-        .map(f => f.path ? path.normalize(f.path).toLowerCase() : null)
+        .map(f => f.path ? path.normalize(f.path).replace(/\\/g, '/').toLowerCase() : null)
         .filter(Boolean)
     );
 
@@ -538,7 +546,7 @@ async function downloadCustomServerFiles(apiDomain, rootPath, onProgress) {
           try {
             const stat = fs.statSync(fullLocalPath);
             if (stat.isFile()) {
-              const normalizedRelPath = path.normalize(`mods/${relativeFile}`).toLowerCase();
+              const normalizedRelPath = path.normalize(`mods/${relativeFile}`).replace(/\\/g, '/').toLowerCase();
               if (!allowedModPaths.has(normalizedRelPath)) {
                 console.warn(`[Protection] Removing unauthorized mod/file: ${normalizedRelPath}`);
                 fs.unlinkSync(fullLocalPath);
@@ -559,7 +567,7 @@ async function downloadCustomServerFiles(apiDomain, rootPath, onProgress) {
     for (const file of files) {
       if (!file.path) continue;
 
-      const normalizedRelPath = path.normalize(file.path);
+      const normalizedRelPath = path.normalize(file.path.replace(/\\/g, '/'));
       const targetPath = path.join(rootPath, normalizedRelPath);
 
       // หากรายการใน manifest เป็นการประกาศโฟลเดอร์

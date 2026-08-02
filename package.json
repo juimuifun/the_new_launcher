@@ -49,7 +49,8 @@
       "main.js",
       "index.html",
       "src/**/*",
-      "dist/output.css",
+      "dist/",
+      "node_modules/eml-lib/dist/cjs/index.js",
       "assets/**/*"
     ],
     "win": {
