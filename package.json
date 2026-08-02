@@ -47,7 +47,8 @@
     "files": [
       "main.js",
       "index.html",
-      "styles.css",
+      "src/**/*",
+      "dist/output.css",
       "assets/**/*"
     ],
     "win": {

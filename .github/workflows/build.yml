@@ -49,6 +49,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build CSS
+        run: npm run build:css
+
       - name: Build & Package Electron App
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
