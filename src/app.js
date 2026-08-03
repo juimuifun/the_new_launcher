@@ -778,7 +778,7 @@ class AppUI {
             playerCountEl.className = 'text-base font-bold text-red-400 font-nexon leading-tight';
           }
           if (playerLabelEl) playerLabelEl.innerText = i18n.t('labelOnlinePlayers');
-          if (cardPlayerCountEl) cardPlayerCountEl.innerText = i18n.t('offline');
+          if (cardPlayerCountEl) cardPlayerCountEl.innerText = `0 / ${data.maxPlayers || 200}`;
         }
       } else {
         if (playerCountEl) {
