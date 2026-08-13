@@ -1,7 +1,7 @@
 // Configuration bundled at build-time (Developer Hardcoded Config)
 // Supports local relative paths (e.g. 'assets/bg.png') or full HTTP/HTTPS URLs (e.g. 'https://domain.com/bg.webm')
 const BUILD_CONFIG = {
-  apiDomain: 'https://minecrad.com:80', // Web Server API URL (e.g. 'http://localhost:3000' or 'https://api.yourserver.com')
+  apiDomain: 'https://minecrad.com', // Web Server API URL (e.g. 'http://localhost:3000' or 'https://api.yourserver.com')
   gameFolderNamespace: '.minecrad', // Custom game folder name inside app installation directory
 
   // รายการโฟลเดอร์/ไฟล์ที่ไม่ต้องการให้ EML-Lib ลบทิ้งตอนสแกนคลีนก่อนรันเกม
@@ -90,7 +90,7 @@ class AppConfig {
   }
 
   get gameFolderNamespace() {
-    return BUILD_CONFIG.gameFolderNamespace || '.the_new_launcher';
+    return BUILD_CONFIG.gameFolderNamespace || '.minecrad';
   }
 
   get cleaningIgnored() {

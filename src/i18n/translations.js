@@ -1,6 +1,6 @@
 const translations = {
   en: {
-    appTitle: "The New Launcher",
+    appTitle: "Minecrad",
     navHome: "Home",
     navForum: "Forum",
     navStore: "Store",
@@ -86,7 +86,7 @@ const translations = {
     forumSubtitle: "News, announcements, and server updates",
   },
   th: {
-    appTitle: "ตัวรันใหม่",
+    appTitle: "Minecrad",
     navHome: "หน้าแรก",
     navForum: "เว็บบอร์ด",
     navStore: "ร้านค้า",
