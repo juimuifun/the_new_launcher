@@ -63,13 +63,12 @@
         "dmg",
         "zip"
       ],
+      "category": "public.app-category.games",
+      "darkModeSupport": true,
       "identity": null,
-      "extraFiles": [
-        {
-          "from": "scripts/Fix-Mac-Launch.command",
-          "to": "Fix-Mac-Launch.command"
-        }
-      ]
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "artifactName": "${productName}-${version}.${ext}"
     },
     "linux": {
       "maintainer": "developer@example.com",
