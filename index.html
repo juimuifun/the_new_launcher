@@ -50,13 +50,40 @@
     .font-sans {
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     }
+
+    html, body {
+      background: transparent !important;
+      background-color: transparent !important;
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .launcher-frame {
+      width: 960px;
+      height: 600px;
+      border-radius: 24px;
+      -webkit-mask-image: -webkit-radial-gradient(white, black);
+      mask-image: radial-gradient(white, black);
+      overflow: hidden;
+    }
+
+    .app-drag-region {
+      -webkit-app-region: drag;
+    }
+
+    .no-drag, .forum-card, .store-card, button, input, select, textarea, a, .nav-btn-item, [role="button"] {
+      -webkit-app-region: no-drag !important;
+    }
   </style>
 </head>
 
-<body class="h-full flex items-center justify-center p-0 m-0 bg-transparent antialiased overflow-hidden">
+<body class="h-full w-full flex items-center justify-center p-0 m-0 bg-transparent antialiased overflow-hidden">
 
   <!-- Outer Rounded Launcher Container (Fixed Size 960x600) -->
-  <div class="w-[960px] h-[600px] rounded-3xl overflow-hidden bg-slate-950 shadow-2xl flex relative isolate">
+  <div class="launcher-frame w-[960px] h-[600px] rounded-3xl overflow-hidden bg-slate-950 shadow-2xl flex relative isolate app-drag-region">
 
     <!-- BACKGROUND MEDIA CONTAINER (FULL LAUNCHER) -->
     <div id="bg-media-container" class="absolute inset-0 z-0 overflow-hidden pointer-events-none rounded-3xl">
@@ -669,166 +696,166 @@
           </div>
         </div>
 
+        <!-- REPAIR CONFIRM MODAL -->
+        <div id="repair-modal"
+          class="hidden absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-3xl no-drag">
+          <div
+            class="w-[400px] bg-[#0c101c] border border-slate-800/80 rounded-3xl p-7 shadow-2xl flex flex-col items-center text-center gap-5">
+
+            <!-- Warning Icon -->
+            <div
+              class="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+
+            <!-- Content -->
+            <div class="space-y-2">
+              <h3 class="text-lg font-black text-white tracking-tight font-nexon" data-i18n="repairConfirmTitle">Delete Game Data?</h3>
+              <p class="text-xs text-slate-400 leading-relaxed font-ekkamaivibe" data-i18n="repairConfirmDesc">
+              </p>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3 w-full pt-1 font-nexon">
+              <button id="btn-repair-cancel"
+                class="flex-1 py-3 px-4 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white font-bold text-sm rounded-2xl transition-all"
+                data-i18n="btnCancel">
+                Cancel
+              </button>
+              <button id="btn-repair-confirm"
+                class="flex-1 py-3 px-4 bg-rose-600/80 hover:bg-rose-600 border border-rose-500/40 text-white font-black text-sm rounded-2xl shadow-lg transition-all"
+                data-i18n="btnDeleteNow">
+                Delete Now
+              </button>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </main>
 
-  </div>
+    <!-- FORUM POST DETAIL MODAL (Inside Launcher Frame) -->
+    <div id="forum-modal"
+      class="hidden absolute inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-6 rounded-3xl no-drag">
+      <div
+        class="w-[860px] max-w-[95%] h-[520px] max-h-[92%] bg-[#0c101c] border border-slate-800/90 rounded-3xl shadow-2xl flex flex-col overflow-hidden relative">
 
-  <!-- CUSTOM UPDATE MODAL (Styled to match launcher dark theme) -->
-  <div id="update-modal"
-    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md transition-all">
-    <div
-      class="w-[420px] bg-[#0c101c] border border-slate-800/80 rounded-3xl p-7 shadow-2xl flex flex-col items-center text-center space-y-5">
-
-      <!-- Icon Badge -->
-      <div id="update-modal-icon-badge"
-        class="w-14 h-14 rounded-2xl custom-accent-bg text-white flex items-center justify-center shadow-lg">
-        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-        </svg>
-      </div>
-
-      <!-- Content -->
-      <div class="space-y-2">
-        <h3 id="update-modal-title" class="text-xl font-black text-white tracking-tight font-nexon"
-          data-i18n="updateReadyTitle">Update Ready</h3>
-        <p id="update-modal-desc" class="text-xs text-slate-300 leading-relaxed font-ekkamaivibe">
-          Version <strong id="update-modal-version" class="custom-accent-text font-bold">1.0.0</strong> downloaded.
-          Restart now to install update.
-        </p>
-      </div>
-
-      <!-- Progress Bar (while downloading) -->
-      <div id="update-modal-progress-wrap" class="hidden w-full space-y-1.5">
-        <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
-          <div id="update-modal-progress-bar" class="custom-accent-bg h-full w-0 transition-all duration-200"></div>
-        </div>
-        <span id="update-modal-progress-text" class="text-[11px] text-slate-400 font-ekkamaivibe">0%</span>
-      </div>
-
-      <!-- Action Buttons -->
-      <div id="update-modal-actions" class="flex items-center gap-3 w-full pt-2 font-nexon">
-        <button id="btn-update-restart"
-          class="flex-1 py-3 px-4 custom-accent-bg hover:opacity-90 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2">
+        <!-- Close Button -->
+        <button id="forum-modal-close" title="Close"
+          class="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-950/80 hover:bg-slate-900 text-slate-400 hover:text-white flex items-center justify-center transition-colors border border-slate-800/80 shadow-md">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
-          <span data-i18n="btnRestartNow">Restart Now</span>
         </button>
-        <button id="btn-update-later"
-          class="py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-2xl transition-colors"
-          data-i18n="btnLater">
-          Later
-        </button>
-      </div>
 
-    </div>
-  </div>
+        <!-- Banner Header with Image + Tag + Title + Date Overlay -->
+        <div id="forum-modal-header" class="relative w-full h-48 bg-slate-900 shrink-0 overflow-hidden">
+          <img id="forum-modal-img" class="w-full h-full object-cover" src="assets/bg.png" alt="Banner">
+          <div class="absolute inset-0 bg-gradient-to-t from-[#0c101c] via-[#0c101c]/60 to-transparent"></div>
 
-  <!-- FORUM POST DETAIL MODAL -->
-  <div id="forum-modal"
-    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 rounded-3xl">
-    <div
-      class="w-[880px] max-w-[94%] h-[530px] max-h-[92%] bg-[#0c101c] border border-slate-800/90 rounded-3xl shadow-2xl flex flex-col overflow-hidden relative">
-
-      <!-- Close Button -->
-      <button id="forum-modal-close" title="Close"
-        class="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-950/80 hover:bg-slate-900 text-slate-400 hover:text-white flex items-center justify-center transition-colors border border-slate-800/80 shadow-md">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-
-      <!-- Banner Header with Image + Tag + Title + Date Overlay -->
-      <div id="forum-modal-header" class="relative w-full h-48 bg-slate-900 shrink-0 overflow-hidden">
-        <img id="forum-modal-img" class="w-full h-full object-cover" src="" alt="Banner">
-        <div class="absolute inset-0 bg-gradient-to-t from-[#0c101c] via-[#0c101c]/60 to-transparent"></div>
-
-        <div class="absolute bottom-4 left-6 right-6 flex flex-col gap-1.5 z-10">
-          <div class="flex items-center gap-2.5">
-            <span id="forum-modal-tag"
-              class="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold tracking-wider uppercase custom-accent-bg text-white shadow-md">Tag</span>
-            <span id="forum-modal-date" class="text-[11px] text-slate-300 font-ekkamaivibe">Date</span>
+          <div class="absolute bottom-4 left-6 right-6 flex flex-col gap-1.5 z-10">
+            <div class="flex items-center gap-2.5">
+              <span id="forum-modal-tag"
+                class="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold tracking-wider uppercase custom-accent-bg text-white shadow-md">Tag</span>
+              <span id="forum-modal-date" class="text-[11px] text-slate-300 font-ekkamaivibe">Date</span>
+            </div>
+            <h2 id="forum-modal-title" class="text-2xl font-black text-white font-nexon leading-snug line-clamp-2">Title
+            </h2>
           </div>
-          <h2 id="forum-modal-title" class="text-2xl font-black text-white font-nexon leading-snug line-clamp-2">Title
-          </h2>
+        </div>
+
+        <!-- Article Body (Markdown Parsed Container) -->
+        <div
+          class="p-6 overflow-y-auto flex-1 space-y-4 font-ekkamaivibe text-slate-200 text-sm leading-relaxed select-text"
+          id="forum-modal-body">
+          <!-- Rendered markdown & color code content goes here -->
         </div>
       </div>
+    </div>
 
-      <!-- Article Body (Markdown Parsed Container) -->
+    <!-- CUSTOM UPDATE MODAL (Inside Launcher Frame) -->
+    <div id="update-modal"
+      class="hidden absolute inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md transition-all rounded-3xl no-drag">
       <div
-        class="p-6 overflow-y-auto flex-1 space-y-4 font-ekkamaivibe text-slate-200 text-sm leading-relaxed select-text"
-        id="forum-modal-body">
-        <!-- Rendered markdown & color code content goes here -->
+        class="w-[420px] bg-[#0c101c] border border-slate-800/80 rounded-3xl p-7 shadow-2xl flex flex-col items-center text-center space-y-5">
+
+        <!-- Icon Badge -->
+        <div id="update-modal-icon-badge"
+          class="w-14 h-14 rounded-2xl custom-accent-bg text-white flex items-center justify-center shadow-lg">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+        </div>
+
+        <!-- Content -->
+        <div class="space-y-2">
+          <h3 id="update-modal-title" class="text-xl font-black text-white tracking-tight font-nexon"
+            data-i18n="updateReadyTitle">Update Ready</h3>
+          <p id="update-modal-desc" class="text-xs text-slate-300 leading-relaxed font-ekkamaivibe">
+            Version <strong id="update-modal-version" class="custom-accent-text font-bold">1.0.0</strong> downloaded.
+            Restart now to install update.
+          </p>
+        </div>
+
+        <!-- Progress Bar (while downloading) -->
+        <div id="update-modal-progress-wrap" class="hidden w-full space-y-1.5">
+          <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
+            <div id="update-modal-progress-bar" class="custom-accent-bg h-full w-0 transition-all duration-200"></div>
+          </div>
+          <span id="update-modal-progress-text" class="text-[11px] text-slate-400 font-ekkamaivibe">0%</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div id="update-modal-actions" class="flex items-center gap-3 w-full pt-2 font-nexon">
+          <button id="btn-update-restart"
+            class="flex-1 py-3 px-4 custom-accent-bg hover:opacity-90 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span data-i18n="btnRestartNow">Restart Now</span>
+          </button>
+          <button id="btn-update-later"
+            class="py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-2xl transition-colors"
+            data-i18n="btnLater">
+            Later
+          </button>
+        </div>
+
       </div>
     </div>
-  </div>
 
-  <!-- REPAIR CONFIRM MODAL -->
-  <div id="repair-modal"
-    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-3xl">
-    <div
-      class="w-[400px] bg-[#0c101c] border border-slate-800/80 rounded-3xl p-7 shadow-2xl flex flex-col items-center text-center gap-5">
-
-      <!-- Warning Icon -->
-      <div
-        class="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    <!-- UPDATE CHECK OVERLAY (Shown on startup) -->
+    <div id="update-check-overlay"
+      class="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-sm transition-opacity duration-300 rounded-3xl overflow-hidden no-drag">
+      <div class="flex flex-col items-center text-center gap-4">
+        <!-- Loading Spinner -->
+        <svg class="w-8 h-8 text-slate-400 animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+          </path>
         </svg>
+        <!-- Status Text -->
+        <div class="flex flex-col gap-1">
+          <p id="update-check-status-text" class="text-sm font-bold text-slate-200 font-nexon">Checking for updates...</p>
+          <p id="update-check-sub-text" class="text-xs text-slate-400 font-ekkamaivibe"></p>
+        </div>
+        <!-- Progress Bar -->
+        <div id="update-check-progress-wrap" class="w-48 bg-slate-800 rounded-full h-1.5 overflow-hidden hidden">
+          <div id="update-check-progress-bar" class="custom-accent-bg h-full w-0 transition-all duration-300"></div>
+        </div>
       </div>
-
-      <!-- Content -->
-      <div class="space-y-2">
-        <h3 class="text-lg font-black text-white tracking-tight font-nexon" data-i18n="repairConfirmTitle">Delete Game Data?</h3>
-        <p class="text-xs text-slate-400 leading-relaxed font-ekkamaivibe" data-i18n="repairConfirmDesc">
-        </p>
-      </div>
-
-      <!-- Buttons -->
-      <div class="flex gap-3 w-full pt-1 font-nexon">
-        <button id="btn-repair-cancel"
-          class="flex-1 py-3 px-4 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white font-bold text-sm rounded-2xl transition-all"
-          data-i18n="btnCancel">
-          Cancel
-        </button>
-        <button id="btn-repair-confirm"
-          class="flex-1 py-3 px-4 bg-rose-600/80 hover:bg-rose-600 border border-rose-500/40 text-white font-black text-sm rounded-2xl shadow-lg transition-all"
-          data-i18n="btnDeleteNow">
-          Delete Now
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- UPDATE CHECK OVERLAY (Shown on startup) -->
-  <div id="update-check-overlay"
-    class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-sm transition-opacity duration-300 rounded-3xl overflow-hidden">
-    <div class="flex flex-col items-center text-center gap-4">
-      <!-- Loading Spinner -->
-      <svg class="w-8 h-8 text-slate-400 animate-spin" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-        </path>
-      </svg>
-      <!-- Status Text -->
-      <div class="flex flex-col gap-1">
-        <p id="update-check-status-text" class="text-sm font-bold text-slate-200 font-nexon">Checking for updates...</p>
-        <p id="update-check-sub-text" class="text-xs text-slate-400 font-ekkamaivibe"></p>
-      </div>
-      <!-- Progress Bar -->
-      <div id="update-check-progress-wrap" class="w-48 bg-slate-800 rounded-full h-1.5 overflow-hidden hidden">
-        <div id="update-check-progress-bar" class="custom-accent-bg h-full w-0 transition-all duration-300"></div>
+      <div class="absolute bottom-4 text-center text-[10px] text-slate-500 font-sans">
+        <p>Minecrad v<span id="app-version-display"></span></p>
       </div>
     </div>
-    <div class="absolute bottom-4 text-center text-[10px] text-slate-500 font-sans">
-      <p>Minecrad v<span id="app-version-display"></span></p>
-    </div>
+
   </div>
 
   <!-- Load Scripts -->

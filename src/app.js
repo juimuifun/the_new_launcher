@@ -686,7 +686,7 @@ class AppUI {
     if (this.currentUser) {
       // Logged in: collapse sidebar to narrow icon bar (~1/12 size, 80px)
       if (mainSidebar) {
-        mainSidebar.className = 'w-20 min-w-[80px] max-w-[80px] bg-[#0c101c]/90 backdrop-blur-md px-3 pt-6 pb-6 flex flex-col z-20 h-full relative transition-all duration-300 rounded-l-3xl';
+        mainSidebar.className = 'w-20 min-w-[80px] max-w-[80px] bg-[#0c101c]/90 backdrop-blur-md px-3 pt-6 pb-6 flex flex-col z-20 h-full relative transition-all duration-300 rounded-l-3xl overflow-hidden';
       }
       if (sidebarAuth) sidebarAuth.classList.add('hidden');
       if (sidebarApp) sidebarApp.classList.remove('hidden');
@@ -718,7 +718,7 @@ class AppUI {
     } else {
       // Logged out: expand sidebar to auth form (1/3 size, 320px)
       if (mainSidebar) {
-        mainSidebar.className = 'w-1/3 min-w-[320px] max-w-[340px] bg-[#0c101c]/80 backdrop-blur-md px-8 pt-8 pb-8 flex flex-col z-20 h-full relative transition-all duration-300 rounded-l-3xl';
+        mainSidebar.className = 'w-1/3 min-w-[320px] max-w-[340px] bg-[#0c101c]/80 backdrop-blur-md px-8 pt-8 pb-8 flex flex-col z-20 h-full relative transition-all duration-300 rounded-l-3xl overflow-hidden';
       }
       if (sidebarAuth) sidebarAuth.classList.remove('hidden');
       if (sidebarApp) sidebarApp.classList.add('hidden');
@@ -791,6 +791,41 @@ class AppUI {
 
     const doFetch = async () => {
       try {
+        let serverIp = '';
+        let serverPort = 25565;
+
+        // 1. ดึง IP / Port เซิร์ฟเวอร์จาก launcher-config ก่อน
+        try {
+          const configRes = await fetch(`${appConfig.apiDomain}/minecraft/api/launcher-config`).catch(() => null);
+          if (configRes && configRes.ok) {
+            const configData = await configRes.json().catch(() => ({}));
+            if (configData && configData.game) {
+              serverIp = (configData.game.serverIp || '').trim();
+              serverPort = configData.game.serverPort || 25565;
+            }
+          }
+        } catch (err) {
+          console.warn('Error fetching launcher-config for server status:', err);
+        }
+
+        // 2. ถ้าได้ serverIp มา ให้เช็คตรงผ่าน Minecraft status API (api.mcsrvstat.us)
+        if (serverIp && serverIp !== 'localhost' && serverIp !== '127.0.0.1') {
+          const queryHost = serverPort && serverPort !== 25565 ? `${serverIp}:${serverPort}` : serverIp;
+          const mcStatRes = await fetch(`https://api.mcsrvstat.us/3/${queryHost}`).catch(() => null);
+          if (mcStatRes && mcStatRes.ok) {
+            const mcData = await mcStatRes.json().catch(() => ({}));
+            if (mcData && mcData.online) {
+              updateUI({
+                online: true,
+                players: mcData.players ? (mcData.players.online || 0) : 0,
+                maxPlayers: mcData.players ? (mcData.players.max || 200) : 200
+              });
+              return;
+            }
+          }
+        }
+
+        // 3. Fallback: ถ้าเช็คตรงไม่ได้ หรือเป็น localhost ให้เรียก status endpoint ของ Web API
         const endpoint = `${appConfig.apiDomain}/minecraft/api/status`;
         const response = await fetch(endpoint).catch(() => null);
         if (response && response.ok) {
@@ -1329,13 +1364,34 @@ class AppUI {
     }, 120);
   }
 
+  // Helper: Extract first image URL from post.image_url or inside markdown description
+  getForumImageUrl(post) {
+    if (post.image_url && post.image_url.trim()) {
+      return post.image_url.trim();
+    }
+    if (post.description) {
+      // Check standard markdown image: ![alt](url)
+      const mdImgMatch = post.description.match(/!\[.*?\]\((https?:\/\/[^\s\)]+)\)/i);
+      if (mdImgMatch && mdImgMatch[1]) {
+        return mdImgMatch[1];
+      }
+      // Check HTML img tag: <img src="url" ...>
+      const htmlImgMatch = post.description.match(/<img[^>]+src=["'](https?:\/\/[^"'>]+)["']/i);
+      if (htmlImgMatch && htmlImgMatch[1]) {
+        return htmlImgMatch[1];
+      }
+    }
+    return 'assets/bg.png';
+  }
+
   createForumCard(post) {
     const card = document.createElement('div');
-    card.className = 'bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800/80 hover:border-slate-700 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-200 cursor-pointer flex flex-col group h-full';
+    card.className = 'forum-card no-drag bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800/80 hover:border-slate-700 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-200 cursor-pointer flex flex-col group h-full select-none';
+    card.style.webkitAppRegion = 'no-drag';
 
-    // Image Header fallback
+    // Image Header with fallback and markdown image extraction
     const defaultImg = 'assets/bg.png';
-    const imageUrl = post.image_url || defaultImg;
+    const imageUrl = this.getForumImageUrl(post);
 
     // Tag background colors
     const tagColors = {
@@ -1368,12 +1424,12 @@ class AppUI {
     }
 
     card.innerHTML = `
-      <div class="h-24 w-full relative overflow-hidden bg-slate-950 shrink-0">
+      <div class="h-24 w-full relative overflow-hidden bg-slate-950 shrink-0 pointer-events-none">
         <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src="${imageUrl}" alt="${post.title || ''}" onerror="this.src='${defaultImg}'">
         <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
         <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider text-white ${tagClass} shadow-md">${post.tag || 'Notice'}</span>
       </div>
-      <div class="p-3 flex-1 flex flex-col justify-between overflow-hidden">
+      <div class="p-3 flex-1 flex flex-col justify-between overflow-hidden pointer-events-none">
         <div>
           <h3 class="text-xs font-bold text-white font-nexon line-clamp-1 group-hover:custom-accent-text transition-colors leading-snug">${post.title || ''}</h3>
           <p class="text-[11px] text-slate-400 font-ekkamaivibe line-clamp-2 mt-1 leading-snug">${cleanSnippet}</p>
@@ -1384,7 +1440,8 @@ class AppUI {
       </div>
     `;
 
-    card.addEventListener('click', () => {
+    card.addEventListener('click', (e) => {
+      e.stopPropagation();
       this.openForumModal(post);
     });
 
@@ -1401,8 +1458,10 @@ class AppUI {
 
     if (!modal) return;
 
+    const imageUrl = this.getForumImageUrl(post);
+
     if (modalImg) {
-      modalImg.src = post.image_url || 'assets/bg.png';
+      modalImg.src = imageUrl;
       modalImg.onerror = () => { modalImg.src = 'assets/bg.png'; };
     }
     if (modalTag) modalTag.innerText = post.tag || 'Notice';
