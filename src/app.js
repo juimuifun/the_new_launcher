@@ -151,17 +151,17 @@ class AppUI {
 
       ipcRenderer.on('updater-message', (event, data) => {
         if (data.status === 'checking') {
-          if (statusText) statusText.innerText = 'Checking for updates...';
+          if (statusText) statusText.innerText = i18n.t('updateChecking');
         } else if (data.status === 'available') {
-          if (statusText) statusText.innerText = 'New update found. Downloading...';
+          if (statusText) statusText.innerText = i18n.t('updateAvailable');
           if (subText) subText.innerText = `Version ${data.version}`;
           if (progressWrap) progressWrap.classList.remove('hidden');
         } else if (data.status === 'not-available') {
-          if (statusText) statusText.innerText = 'Launcher is up to date.';
+          if (statusText) statusText.innerText = i18n.t('updateNotAvailable');
           setTimeout(endUpdateCheck, 1000);
         } else if (data.status === 'error') {
-          if (statusText) statusText.innerText = 'Unable to check for updates.';
-          if (subText) subText.innerText = 'Skipping and continuing...';
+          if (statusText) statusText.innerText = i18n.t('updateError');
+          if (subText) subText.innerText = i18n.t('updateErrorSub');
           setTimeout(endUpdateCheck, 1500);
         }
       });
@@ -253,6 +253,20 @@ class AppUI {
         btnLoginWrap.classList.remove('hidden');
         toggleToLogin.classList.add('hidden');
         toggleToRegister.classList.remove('hidden');
+        this.loadSavedCredentials();
+      });
+    }
+
+    // Remember Password Checkbox toggle handler
+    const rememberCheck = document.getElementById('remember-password-check');
+    const rememberLabel = document.getElementById('remember-password-label');
+    if (rememberLabel && rememberCheck) {
+      rememberLabel.addEventListener('click', (e) => {
+        if (e.target !== rememberCheck) {
+          e.preventDefault();
+          rememberCheck.checked = !rememberCheck.checked;
+          rememberCheck.dispatchEvent(new Event('change', { bubbles: true }));
+        }
       });
     }
 
@@ -341,6 +355,19 @@ class AppUI {
             loggedInAt: new Date().toISOString()
           };
           localStorage.setItem('launcher_user', JSON.stringify(this.currentUser));
+
+          // Save or clear remembered password credentials
+          const rememberCheck = document.getElementById('remember-password-check');
+          if (rememberCheck && rememberCheck.checked) {
+            localStorage.setItem('launcher_saved_credentials', JSON.stringify({
+              username: username,
+              password: btoa(unescape(encodeURIComponent(password))),
+              remember: true
+            }));
+          } else {
+            localStorage.removeItem('launcher_saved_credentials');
+          }
+
           setButtonLoading('login', false);
           this.updateUserDisplay();
           this.switchView('view-home');
@@ -725,6 +752,42 @@ class AppUI {
 
       if (userNameEl) userNameEl.innerText = 'Player';
       if (userAvatarEl) userAvatarEl.src = 'https://mc-heads.net/avatar/steve/64';
+
+      // Load saved credentials if remembered
+      this.loadSavedCredentials();
+    }
+  }
+
+  // Populate remembered credentials into login inputs
+  loadSavedCredentials() {
+    try {
+      const saved = localStorage.getItem('launcher_saved_credentials');
+      const userInput = document.getElementById('input-login-user');
+      const passInput = document.getElementById('input-login-pass');
+      const rememberCheck = document.getElementById('remember-password-check');
+
+      if (saved) {
+        const creds = JSON.parse(saved);
+        if (userInput && creds.username) {
+          userInput.value = creds.username;
+        }
+        if (passInput && creds.password) {
+          try {
+            passInput.value = decodeURIComponent(escape(atob(creds.password)));
+          } catch (e) {
+            passInput.value = creds.password;
+          }
+        }
+        if (rememberCheck) {
+          rememberCheck.checked = !!creds.remember;
+        }
+      } else {
+        if (rememberCheck) {
+          rememberCheck.checked = false;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to load saved credentials:', e);
     }
   }
 

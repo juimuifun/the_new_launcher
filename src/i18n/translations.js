@@ -25,6 +25,7 @@ const translations = {
     btnSubmitLogin: "Log In",
     btnSubmitRegister: "Register",
     staySignedIn: "Stay logged in",
+    rememberPassword: "Remember Password",
     cantSignInOrCreate: "CAN'T LOG IN? / CREATE ACCOUNT",
     alreadyHaveAccountSignIn: "ALREADY HAVE AN ACCOUNT? LOG IN",
     
@@ -60,14 +61,28 @@ const translations = {
     settingSubtitle: "Configure window size, memory allocation, and interface language",
     secGeneral: "General Settings",
     secApi: "API & Web Server",
+    labelFullscreen: "Fullscreen",
+    descFullscreen: "Start instances in fullscreen mode.",
+    labelWidth: "Width",
+    descWidth: "The width of the game window when launched.",
+    labelHeight: "Height",
+    descHeight: "The height of the game window when launched.",
+    labelMemoryAllocation: "Memory allocation",
+    descMemoryAllocation: "Maximum memory available to each instance.",
     labelLanguage: "Interface Language",
+    descLanguage: "Select display language for launcher interface.",
     labelPrimaryColor: "Theme Accent Color",
     labelApiDomain: "Main Web Server API Domain",
     placeholderApiDomain: "https://api.yourserver.com",
     btnSaveSettings: "Save Settings",
     settingsSavedMessage: "Settings updated successfully!",
 
-    // Update Modal
+    // Update Startup & Modal
+    updateChecking: "Checking for updates...",
+    updateAvailable: "New update found. Downloading...",
+    updateNotAvailable: "Launcher is up to date.",
+    updateError: "Unable to check for updates.",
+    updateErrorSub: "Skipping and continuing...",
     updateReadyTitle: "Update Ready",
     updateModalDesc: "Version {version} downloaded. Restart now to install update.",
     btnRestartNow: "Restart Now",
@@ -83,7 +98,18 @@ const translations = {
     btnClose: "OK",
 
     // Forum Page
+    forumTitle: "FORUM & ANNOUNCEMENTS",
     forumSubtitle: "News, announcements, and server updates",
+    forumLoading: "Loading forum posts...",
+    forumEmpty: "No posts found at this time.",
+    forumScrollHint: "Scroll the mouse wheel to navigate 6 posts at a time",
+    forumTotalPosts: "{count} posts total",
+
+    // Store Page
+    storeTitle: "STORE",
+    storeSubtitle: "Top hot items displayed 6 per page",
+    storeLoading: "Loading hot store items...",
+    storeEmpty: "No hot items available right now.",
   },
   th: {
     appTitle: "Minecrad",
@@ -111,6 +137,7 @@ const translations = {
     btnSubmitLogin: "เข้าสู่ระบบ",
     btnSubmitRegister: "ลงทะเบียน",
     staySignedIn: "จดจำการเข้าสู่ระบบ",
+    rememberPassword: "จำรหัสผ่าน",
     cantSignInOrCreate: "เข้าสู่ระบบไม่ได้? / สมัครสมาชิก",
     alreadyHaveAccountSignIn: "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ",
     
@@ -146,14 +173,28 @@ const translations = {
     settingSubtitle: "ตั้งค่าขนาดหน้าต่าง, หน่วยความจำ และภาษาจัดแสดง",
     secGeneral: "การตั้งค่าทั่วไป",
     secApi: "การเชื่อมต่อ API & Web Server",
-    labelLanguage: "ภาษาของเมนู",
+    labelFullscreen: "โหมดเต็มจอ (Fullscreen)",
+    descFullscreen: "เปิดหน้าต่างเกมแบบเต็มหน้าจออัตโนมัติ",
+    labelWidth: "ความกว้าง (Width)",
+    descWidth: "ความกว้างของหน้าต่างเกมเมื่อเริ่มเกม",
+    labelHeight: "ความสูง (Height)",
+    descHeight: "ความสูงของหน้าต่างเกมเมื่อเริ่มเกม",
+    labelMemoryAllocation: "การจัดสรรหน่วยความจำ (RAM)",
+    descMemoryAllocation: "หน่วยความจำสูงสุดที่อนุญาตให้ตัวเกมใช้งาน",
+    labelLanguage: "ภาษาของเมนู (Interface Language)",
+    descLanguage: "เลือกภาษาที่ต้องการให้แสดงผลใน Launcher",
     labelPrimaryColor: "โทนสีของแอป (Accent Color)",
     labelApiDomain: "โดเมน Web Server API หลัก",
     placeholderApiDomain: "https://api.yourserver.com",
     btnSaveSettings: "บันทึกการตั้งค่า",
     settingsSavedMessage: "บันทึกการตั้งค่าเรียบร้อยแล้ว!",
 
-    // Update Modal
+    // Update Startup & Modal
+    updateChecking: "กำลังตรวจสอบเวอร์ชันอัปเดต...",
+    updateAvailable: "พบอัปเดตใหม่ กำลังดาวน์โหลด...",
+    updateNotAvailable: "Launcher เป็นเวอร์ชันล่าสุดแล้ว",
+    updateError: "ไม่สามารถตรวจสอบอัปเดตได้",
+    updateErrorSub: "กำลังข้ามขั้นตอนเพื่อเข้าสู่ระบบ...",
     updateReadyTitle: "มีอัปเดตใหม่พร้อมใช้งาน",
     updateModalDesc: "ดาวน์โหลดเวอร์ชัน {version} เรียบร้อยแล้ว รีสตาร์ทตอนนี้เพื่อทำการติดตั้ง",
     btnRestartNow: "รีสตาร์ทตอนนี้",
@@ -169,7 +210,18 @@ const translations = {
     btnClose: "ตกลง",
 
     // Forum Page
-    forumSubtitle: "News, announcements, and server updates",
+    forumTitle: "เว็บบอร์ด & ข่าวสาร",
+    forumSubtitle: "ข่าวสาร ประกาศ และอัปเดตเซิร์ฟเวอร์",
+    forumLoading: "กำลังโหลดบทความเว็บบอร์ด...",
+    forumEmpty: "ไม่พบบทความข่าวสารในขณะนี้",
+    forumScrollHint: "เลื่อนล้อเมาส์เพื่อดูหน้าถัดไป (6 บทความต่อหน้า)",
+    forumTotalPosts: "ทั้งหมด {count} บทความ",
+
+    // Store Page
+    storeTitle: "ร้านค้าเซิร์ฟเวอร์",
+    storeSubtitle: "ไอเทมยอดนิยม แสดง 6 รายการต่อหน้า",
+    storeLoading: "กำลังโหลดสินค้าในร้านค้า...",
+    storeEmpty: "ไม่มีสินค้าวางจำหน่ายในขณะนี้",
   }
 };
 
