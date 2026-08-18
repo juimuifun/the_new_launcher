@@ -21,7 +21,7 @@ const BUILD_CONFIG = {
   primaryColor: '#8b5cf6', // Default accent color (purple)
   bgVideo: 'assets/videos/bg.webm', // Local path or URL (e.g. 'https://example.com/video.webm')
   bgImage: 'assets/bg.png', // Local path or URL (e.g. 'https://example.com/bg.png')
-  logoIcon: 'M', // Text logo (e.g. 'JF') or Image Path / URL (e.g. 'https://example.com/logo.png')
+  logoIcon: 'assets/icon.svg', // Text logo (e.g. 'JF') or Image Path / URL (e.g. 'https://example.com/logo.png')
 
   // Server Identity (แสดงในหน้า Home)
   serverName: 'MINECRAD', // ชื่อเซิร์ฟเวอร์ที่แสดงในหน้า Home

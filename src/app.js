@@ -77,10 +77,10 @@ class AppUI {
     }
   }
 
-  applyLogoIcon() {
-    const logoText = document.getElementById('logo-text');
-    const logoImg = document.getElementById('logo-img');
-    const val = appConfig.logoIcon;
+  applyLogoIcon(targetVal, targetTextId = 'logo-text', targetImgId = 'logo-img') {
+    const val = targetVal !== undefined ? targetVal : appConfig.logoIcon;
+    const logoText = document.getElementById(targetTextId);
+    const logoImg = document.getElementById(targetImgId);
 
     if (!val) return;
 
@@ -640,17 +640,11 @@ class AppUI {
       this.loadSettingsForm();
     }
 
-    // Highlight active nav item
+    // Highlight active nav item (SAO Style)
     document.querySelectorAll('[data-target-view]').forEach(btn => {
       const isTarget = btn.getAttribute('data-target-view') === viewId;
       if (btn.classList.contains('nav-btn-item')) {
-        if (isTarget) {
-          btn.classList.add('custom-accent-bg', 'text-white');
-          btn.classList.remove('bg-slate-900/80', 'text-slate-400');
-        } else {
-          btn.classList.remove('custom-accent-bg', 'text-white');
-          btn.classList.add('bg-slate-900/80', 'text-slate-400');
-        }
+        btn.classList.toggle('active', isTarget);
       }
     });
   }
@@ -713,7 +707,7 @@ class AppUI {
     if (this.currentUser) {
       // Logged in: collapse sidebar to narrow icon bar (~1/12 size, 80px)
       if (mainSidebar) {
-        mainSidebar.className = 'w-20 min-w-[80px] max-w-[80px] bg-[#0c101c]/90 backdrop-blur-md px-3 pt-6 pb-6 flex flex-col z-20 h-full relative transition-all duration-300 rounded-l-3xl overflow-hidden';
+        mainSidebar.className = 'w-20 min-w-[80px] max-w-[80px] bg-slate-950/60 backdrop-blur-xl px-3 pt-6 pb-6 flex flex-col z-20 h-full relative transition-all duration-300 rounded-l-3xl overflow-hidden border-r border-white/10 shadow-2xl';
       }
       if (sidebarAuth) sidebarAuth.classList.add('hidden');
       if (sidebarApp) sidebarApp.classList.remove('hidden');
@@ -745,7 +739,7 @@ class AppUI {
     } else {
       // Logged out: expand sidebar to auth form (1/3 size, 320px)
       if (mainSidebar) {
-        mainSidebar.className = 'w-1/3 min-w-[320px] max-w-[340px] bg-[#0c101c]/80 backdrop-blur-md px-8 pt-8 pb-8 flex flex-col z-20 h-full relative transition-all duration-300 rounded-l-3xl overflow-hidden';
+        mainSidebar.className = 'w-1/3 min-w-[320px] max-w-[340px] bg-slate-950/60 backdrop-blur-xl px-8 pt-8 pb-8 flex flex-col z-20 h-full relative transition-all duration-300 rounded-l-3xl overflow-hidden border-r border-white/10 shadow-2xl';
       }
       if (sidebarAuth) sidebarAuth.classList.remove('hidden');
       if (sidebarApp) sidebarApp.classList.add('hidden');
@@ -927,15 +921,13 @@ class AppUI {
 
     if (this.isGameRunning) {
       btn.disabled = true;
-      btn.classList.add('bg-slate-700', 'text-slate-300', 'cursor-not-allowed', 'opacity-80');
-      btn.classList.remove('custom-accent-bg', 'hover:opacity-95', 'bg-amber-500', 'text-slate-950', 'text-white');
+      btn.classList.add('opacity-75', 'cursor-not-allowed');
       if (iconPlay) iconPlay.classList.add('hidden');
       if (iconSpinner) iconSpinner.classList.add('hidden');
       textLabel.innerText = i18n.t('gameRunning');
     } else {
       btn.disabled = false;
-      btn.classList.remove('bg-amber-500', 'text-slate-950', 'bg-slate-700', 'text-slate-300', 'cursor-not-allowed', 'opacity-70', 'opacity-80', 'opacity-90');
-      btn.classList.add('custom-accent-bg', 'text-white', 'hover:opacity-95');
+      btn.classList.remove('opacity-75', 'cursor-not-allowed');
       if (iconPlay) iconPlay.classList.remove('hidden');
 
       if (window.require) {

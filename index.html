@@ -56,6 +56,172 @@
       font-family: var(--font-body) !important;
     }
 
+    .sao-nav-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background-color: #FBFBFB;
+      color: #71717A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      position: relative;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .sao-nav-btn:hover {
+      background-color: #EBA601;
+      color: #FFFFFF;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .sao-nav-btn.active {
+      background-color: #EBA601 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    /* SAO outer thin static ring on active state (no glow/pulse) */
+    .sao-nav-btn.active::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid #EBA601;
+      pointer-events: none;
+    }
+
+    .sao-play-btn {
+      background-color: #FBFBFB !important;
+      color: #1E293B !important;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 6px !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .sao-play-btn:hover:not(:disabled) {
+      background-color: #EBA601 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .sao-play-btn:disabled {
+      opacity: 0.75;
+      cursor: not-allowed;
+    }
+
+    /* Solid SAO gold progress bar */
+    #launch-progress-bar {
+      background-color: #EBA601 !important;
+    }
+
+    /* SAO Modal Styles (3-part: Header #FBFBFB, Body #D8D8D8, Footer #FBFBFB) */
+    .sao-modal-card {
+      background-color: #FBFBFB !important;
+      border: 1px solid rgba(0, 0, 0, 0.12) !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+      border-radius: 6px !important;
+      overflow: hidden;
+      width: 440px !important;
+      max-width: 90vw !important;
+    }
+
+    .sao-modal-header {
+      background-color: #FBFBFB !important;
+      border-bottom: 1px solid #BFBFBF !important;
+      padding: 12px 20px !important;
+    }
+
+    .sao-modal-body {
+      background-color: #D8D8D8 !important;
+      border-bottom: 1px solid #BFBFBF !important;
+      padding: 28px 32px !important;
+      min-height: 110px !important;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sao-modal-footer {
+      background-color: #FBFBFB !important;
+      padding: 16px 64px !important;
+      display: flex;
+      align-items: center;
+      justify-content: space-between !important;
+    }
+
+    /* SAO Circular Action Buttons (O Confirm & X Cancel - 46px matching sidebar) */
+    .sao-btn-confirm {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: #3278BE !important;
+      border: 3px solid #FFFFFF !important;
+      box-shadow: 0 0 0 2px #3278BE, 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF !important;
+      transition: transform 0.1s ease;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .sao-btn-confirm:hover:not(:disabled) {
+      transform: scale(1.06);
+    }
+
+    .sao-btn-confirm:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+
+    .sao-btn-cancel {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: #ED3A5A !important;
+      border: 3px solid #FFFFFF !important;
+      box-shadow: 0 0 0 2px #ED3A5A, 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF !important;
+      transition: transform 0.1s ease;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .sao-btn-cancel:hover:not(:disabled) {
+      transform: scale(1.06);
+    }
+
+    .sao-btn-cancel:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+
+    /* SAO Clean Input Field (#FBFBFB background) */
+    .sao-input {
+      background-color: #FBFBFB !important;
+      border: 1px solid rgba(0, 0, 0, 0.12) !important;
+      color: #1E293B !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .sao-input::placeholder {
+      color: #8E8E93 !important;
+    }
+
+    .sao-input:focus {
+      border-color: #EBA601 !important;
+      box-shadow: 0 0 0 2px rgba(235, 166, 1, 0.3) !important;
+    }
+
     .font-sans {
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     }
@@ -124,9 +290,9 @@
       </button>
     </div>
 
-    <!-- 1/3 SIDEBAR CONTAINER -->
+    <!-- 1/3 SIDEBAR CONTAINER (Dark Glassmorphism) -->
     <aside id="main-sidebar"
-      class="w-1/3 min-w-[320px] max-w-[340px] bg-[#0c101c]/80 backdrop-blur-md px-8 pt-8 pb-8 flex flex-col z-20 h-full relative transition-all duration-300 rounded-l-3xl">
+      class="w-1/3 min-w-[320px] max-w-[340px] bg-slate-950/60 backdrop-blur-xl px-8 pt-8 pb-8 flex flex-col z-20 h-full relative transition-all duration-300 rounded-l-3xl border-r border-white/10 shadow-2xl">
 
       <!-- Draggable Area at top of sidebar -->
       <div class="drag absolute top-0 left-0 right-0 h-10"></div>
@@ -137,11 +303,11 @@
         <!-- TOP: Logo + Title + Form Fields -->
         <div class="w-full flex flex-col items-center text-center mt-10">
 
-          <!-- Logo Badge / Icon -->
+          <!-- Logo Badge / Icon (Transparent background) -->
           <div id="logo-container"
-            class="w-16 h-16 rounded-2xl custom-accent-bg flex items-center justify-center text-white font-black text-2xl tracking-wider shadow-md overflow-hidden">
+            class="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-black text-2xl tracking-wider overflow-hidden">
             <span id="logo-text">JF</span>
-            <img id="logo-img" class="w-full h-full object-cover hidden" alt="Logo">
+            <img id="logo-img" class="w-full h-full object-contain hidden" alt="Logo">
           </div>
 
           <!-- LOGIN FORM -->
@@ -152,23 +318,23 @@
             <form id="form-login" class="w-full flex flex-col items-center gap-3.5 no-drag">
               <div class="w-full">
                 <input type="text" id="input-login-user"
-                  class="w-full bg-[#050811]/90 border border-slate-800/80 rounded-xl px-4 py-3 text-sm font-medium tracking-wide text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-0 focus-visible:outline-none custom-accent-focus transition-colors duration-150 text-left font-sans"
+                  class="w-full sao-input rounded-xl px-4 py-3 text-sm font-bold tracking-wide focus:outline-none text-left font-sans transition-all duration-150"
                   data-i18n-placeholder="placeholderUsername" placeholder="USERNAME">
               </div>
               <div class="w-full">
                 <input type="password" id="input-login-pass"
-                  class="w-full bg-[#050811]/90 border border-slate-800/80 rounded-xl px-4 py-3 text-sm font-medium tracking-wide text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-0 focus-visible:outline-none custom-accent-focus transition-colors duration-150 text-left font-sans"
+                  class="w-full sao-input rounded-xl px-4 py-3 text-sm font-bold tracking-wide focus:outline-none text-left font-sans transition-all duration-150"
                   data-i18n-placeholder="placeholderPassword" placeholder="PASSWORD">
               </div>
               <div class="w-full flex items-center justify-start px-1 mt-0.5 no-drag">
                 <label id="remember-password-label" for="remember-password-check" class="no-drag flex items-center gap-2.5 cursor-pointer select-none group py-1">
                   <input type="checkbox" id="remember-password-check" class="sr-only no-drag">
-                  <div class="remember-box w-4 h-4 bg-[#050811]/90 border border-slate-700/80 rounded-md transition-all flex items-center justify-center group-hover:border-slate-500 shrink-0">
+                  <div class="remember-box w-4 h-4 bg-[#FBFBFB] border border-black/20 rounded-md transition-all flex items-center justify-center group-hover:border-black/40 shrink-0 shadow-sm">
                     <svg class="w-3 h-3 text-white hidden pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <span class="text-xs font-semibold text-slate-400 group-hover:text-slate-200 transition-colors font-nexon tracking-wide no-drag" data-i18n="rememberPassword">REMEMBER PASSWORD</span>
+                  <span class="text-xs font-bold text-slate-300 group-hover:text-white transition-colors font-nexon tracking-wide no-drag" data-i18n="rememberPassword">REMEMBER PASSWORD</span>
                 </label>
               </div>
             </form>
@@ -182,17 +348,17 @@
             <form id="form-register" class="w-full flex flex-col items-center gap-3.5">
               <div class="w-full">
                 <input type="text" id="input-reg-user"
-                  class="w-full bg-[#050811]/90 border border-slate-800/80 rounded-xl px-4 py-3 text-sm font-medium tracking-wide text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-0 focus-visible:outline-none custom-accent-focus transition-colors duration-150 text-left font-sans"
+                  class="w-full sao-input rounded-xl px-4 py-3 text-sm font-bold tracking-wide focus:outline-none text-left font-sans transition-all duration-150"
                   data-i18n-placeholder="placeholderUsername" placeholder="USERNAME">
               </div>
               <div class="w-full">
                 <input type="password" id="input-reg-pass"
-                  class="w-full bg-[#050811]/90 border border-slate-800/80 rounded-xl px-4 py-3 text-sm font-medium tracking-wide text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-0 focus-visible:outline-none custom-accent-focus transition-colors duration-150 text-left font-sans"
+                  class="w-full sao-input rounded-xl px-4 py-3 text-sm font-bold tracking-wide focus:outline-none text-left font-sans transition-all duration-150"
                   data-i18n-placeholder="placeholderPassword" placeholder="PASSWORD">
               </div>
               <div class="w-full">
                 <input type="password" id="input-reg-confirm"
-                  class="w-full bg-[#050811]/90 border border-slate-800/80 rounded-xl px-4 py-3 text-sm font-medium tracking-wide text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-0 focus-visible:outline-none custom-accent-focus transition-colors duration-150 text-left font-sans"
+                  class="w-full sao-input rounded-xl px-4 py-3 text-sm font-bold tracking-wide focus:outline-none text-left font-sans transition-all duration-150"
                   data-i18n-placeholder="placeholderConfirmPassword" placeholder="CONFIRM PASSWORD">
               </div>
             </form>
@@ -212,12 +378,12 @@
             <span id="auth-alert-text"></span>
           </div>
 
-          <!-- Submit Button (login) -->
+          <!-- Submit Button (login - SAO Confirm #3278BE) -->
           <div id="btn-login-wrap" class="flex justify-center">
             <button id="btn-login-submit" type="button"
-              class="w-14 h-14 rounded-2xl custom-accent-bg hover:opacity-90 transition-all flex items-center justify-center text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
-              <svg id="btn-login-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              class="sao-btn-confirm disabled:opacity-50 disabled:cursor-not-allowed">
+              <svg id="btn-login-icon" class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                <path d="M4 11h11.17l-4.58-4.59L12 5l7 7-7 7-1.41-1.41L15.17 13H4v-2z" />
               </svg>
               <svg id="btn-login-spinner" class="w-6 h-6 animate-spin hidden" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -228,12 +394,12 @@
             </button>
           </div>
 
-          <!-- Submit Button (register) -->
+          <!-- Submit Button (register - SAO Confirm #3278BE) -->
           <div id="btn-register-wrap" class="flex justify-center hidden">
             <button id="btn-register-submit" type="button"
-              class="w-14 h-14 rounded-2xl custom-accent-bg hover:opacity-90 transition-all flex items-center justify-center text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
-              <svg id="btn-register-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              class="sao-btn-confirm disabled:opacity-50 disabled:cursor-not-allowed">
+              <svg id="btn-register-icon" class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                <path d="M4 11h11.17l-4.58-4.59L12 5l7 7-7 7-1.41-1.41L15.17 13H4v-2z" />
               </svg>
               <svg id="btn-register-spinner" class="w-6 h-6 animate-spin hidden" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -247,12 +413,12 @@
           <!-- Can't Sign In / Toggle -->
           <div class="mt-2">
             <button id="toggle-to-register"
-              class="text-xs font-bold tracking-wider text-slate-400 hover:text-white transition-colors uppercase font-nexon"
+              class="text-xs font-bold tracking-wider text-slate-300 hover:text-white transition-colors uppercase font-nexon"
               data-i18n="cantSignInOrCreate">
               CAN'T LOG IN? / CREATE ACCOUNT
             </button>
             <button id="toggle-to-login"
-              class="text-xs font-bold tracking-wider text-slate-400 hover:text-white transition-colors uppercase font-nexon hidden"
+              class="text-xs font-bold tracking-wider text-slate-300 hover:text-white transition-colors uppercase font-nexon hidden"
               data-i18n="alreadyHaveAccountSignIn">
               ALREADY HAVE AN ACCOUNT? LOG IN
             </button>
@@ -268,65 +434,66 @@
         <!-- TOP: Logo Badge (Same as Auth) -->
         <div class="mt-6 flex flex-col items-center">
           <div id="app-logo-container"
-            class="w-12 h-12 rounded-2xl custom-accent-bg flex items-center justify-center text-white font-black text-xl tracking-wider shadow-md overflow-hidden">
+            class="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-xl tracking-wider overflow-hidden">
             <span id="app-logo-text">JF</span>
-            <img id="app-logo-img" class="w-full h-full object-cover hidden" alt="Logo">
+            <img id="app-logo-img" class="w-full h-full object-contain hidden" alt="Logo">
           </div>
         </div>
 
         <!-- CENTER NAVIGATION BUTTONS -->
-        <div class="flex-1 flex flex-col items-center justify-center gap-4 w-full">
+        <div class="flex-1 flex flex-col items-center justify-center gap-5 w-full">
           <!-- 1. Home Button (Main Launch Screen) -->
           <button data-target-view="view-home" title="Home"
-            class="nav-btn-item w-12 h-12 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white transition-all flex items-center justify-center border border-slate-800/60 shadow-md group">
+            class="nav-btn-item sao-nav-btn group">
             <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor"
               viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                 d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
           </button>
 
           <!-- 2. Forum Button -->
           <button data-target-view="view-forum" title="Forum"
-            class="nav-btn-item w-12 h-12 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white transition-all flex items-center justify-center border border-slate-800/60 shadow-md group">
+            class="nav-btn-item sao-nav-btn group">
             <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor"
               viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                 d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
             </svg>
           </button>
 
           <!-- 3. Store Button -->
           <button data-target-view="view-store" title="Store"
-            class="nav-btn-item w-12 h-12 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white transition-all flex items-center justify-center border border-slate-800/60 shadow-md group">
+            class="nav-btn-item sao-nav-btn group">
             <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor"
               viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                 d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
           </button>
         </div>
 
         <!-- BOTTOM BUTTONS: Settings & Logout -->
-        <div class="flex flex-col items-center gap-3 w-full mb-2">
+        <div class="flex flex-col items-center gap-4 w-full mb-2">
           <!-- Settings Button -->
           <button data-target-view="view-setting" title="Settings"
-            class="nav-btn-item w-12 h-12 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white transition-all flex items-center justify-center border border-slate-800/60 shadow-md group">
+            class="nav-btn-item sao-nav-btn group">
             <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor"
               viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                 d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </button>
 
-          <!-- Logout Button (Left Arrow Icon) -->
+          <!-- Logout Button (SAO Door Exit Icon - SAO Cancel #ED3A5A) -->
           <button id="btn-logout" title="Sign Out"
-            class="w-12 h-12 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-all flex items-center justify-center border border-rose-500/30 shadow-md group">
-            <svg class="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor"
-              viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            class="sao-nav-btn hover:!bg-[#ED3A5A] hover:!text-white group">
+            <svg class="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+              <!-- SAO Door frame + Arrow pointing out -->
+              <path d="M5 3h10a2 2 0 0 1 2 2v2h-2V5H5v14h10v-2h2v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/>
+              <path d="M10 11h7.586l-2.293-2.293 1.414-1.414L21.414 12l-4.707 4.707-1.414-1.414L17.586 13H10v-2z"/>
             </svg>
           </button>
         </div>
@@ -406,17 +573,17 @@
 
             <!-- STATUS TEXT LABEL (Displayed Above Play Button) -->
             <div id="launch-status-text"
-              class="h-6 text-xs custom-accent-text font-ekkamaivibe text-center mb-1.5 transition-all truncate max-w-sm">
+              class="h-6 text-xs text-[#EBA601] font-bold font-ekkamaivibe text-center mb-1.5 transition-all truncate max-w-sm">
             </div>
 
             <!-- CENTER: PLAY BUTTON WITH INTEGRATED PROGRESS BAR -->
             <div class="relative w-[340px] max-w-full">
               <button id="btn-launch-game" type="button"
-                class="w-full h-14 rounded-2xl custom-accent-bg hover:opacity-95 transition-all flex items-center justify-center text-white shadow-xl relative overflow-hidden group">
+                class="sao-play-btn w-full h-14 flex items-center justify-center shadow-xl relative overflow-hidden group">
 
-                <!-- Inner Progress Bar Fill Layer (0% to 100%) -->
+                <!-- Inner Progress Bar Fill Layer (0% to 100%) Solid SAO Gold -->
                 <div id="launch-progress-bar"
-                  class="absolute inset-y-0 left-0 bg-white/25 w-0 transition-all duration-200 pointer-events-none">
+                  class="absolute inset-y-0 left-0 w-0 transition-all duration-200 pointer-events-none">
                 </div>
 
                 <!-- Button Content (Icon + Short Label) -->
@@ -433,21 +600,20 @@
                     </path>
                   </svg>
                   <!-- Short Text Label (Inside Button) -->
-                  <span id="launch-btn-text" class="font-black text-base tracking-wide font-nexon"
+                  <span id="launch-btn-text" class="font-black text-base tracking-wider font-nexon"
                     data-i18n="playNow">PLAY NOW</span>
                 </div>
 
               </button>
             </div>
 
-            <!-- RIGHT: REPAIR BUTTON (absolute, far right) -->
+            <!-- RIGHT: REPAIR BUTTON (absolute, far right - SAO Circle Button) -->
             <div class="absolute right-0 bottom-0">
               <button id="btn-repair-launcher" type="button" title="ลบโฟลเดอร์เกมและติดตั้งใหม่"
-                class="w-14 h-14 rounded-2xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800/80 text-slate-400 hover:text-white transition-all duration-200 flex items-center justify-center shadow-lg group">
-                <svg class="w-5 h-5 group-hover:rotate-12 transition-transform duration-200" fill="none"
-                  stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.9 6.91a2.12 2.12 0 01-3-3l6.91-6.9a6 6 0 017.94-7.94l-3.76 3.76z" />
+                class="sao-nav-btn group">
+                <!-- SAO Wrench Icon (ประแจ) -->
+                <svg class="w-5 h-5 group-hover:rotate-45 transition-transform duration-300 fill-current" viewBox="0 0 24 24">
+                  <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
                 </svg>
               </button>
             </div>
@@ -716,39 +882,41 @@
           </div>
         </div>
 
-        <!-- REPAIR CONFIRM MODAL -->
+        <!-- REPAIR CONFIRM MODAL (SAO 3-Part Alert Style) -->
         <div id="repair-modal"
           class="hidden absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-3xl no-drag">
           <div
-            class="w-[400px] bg-[#0c101c] border border-slate-800/80 rounded-3xl p-7 shadow-2xl flex flex-col items-center text-center gap-5">
+            class="sao-modal-card flex flex-col shadow-2xl">
 
-            <!-- Warning Icon -->
-            <div
-              class="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
+            <!-- 1. SAO Header (#FBFBFB) -->
+            <div class="sao-modal-header text-center">
+              <h3 class="text-xl font-black text-slate-800 tracking-wider font-nexon" data-i18n="repairConfirmTitle">Alert</h3>
             </div>
 
-            <!-- Content -->
-            <div class="space-y-2">
-              <h3 class="text-lg font-black text-white tracking-tight font-nexon" data-i18n="repairConfirmTitle">Delete Game Data?</h3>
-              <p class="text-xs text-slate-400 leading-relaxed font-ekkamaivibe" data-i18n="repairConfirmDesc">
+            <!-- 2. SAO Body (#D8D8D8 - Longer & Spacious) -->
+            <div class="sao-modal-body text-center">
+              <p class="text-sm md:text-base font-bold text-slate-800 leading-relaxed font-ekkamaivibe" data-i18n="repairConfirmDesc">
+                การดำเนินการนี้จะลบโฟลเดอร์เกมทั้งหมดอย่างถาวร และต้องดาวน์โหลดเกมใหม่ตั้งแต่ต้น
               </p>
             </div>
 
-            <!-- Buttons -->
-            <div class="flex gap-3 w-full pt-1 font-nexon">
-              <button id="btn-repair-cancel"
-                class="flex-1 py-3 px-4 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white font-bold text-sm rounded-2xl transition-all"
-                data-i18n="btnCancel">
-                Cancel
+            <!-- 3. SAO Footer (#FBFBFB with 46px O & X Buttons close to each other) -->
+            <div class="sao-modal-footer">
+              <!-- Confirm / Delete (Circle O - Blue #3278BE) -->
+              <button id="btn-repair-confirm" title="Delete Now"
+                class="sao-btn-confirm group">
+                <!-- Dual concentric circle representing SAO 'O' -->
+                <div class="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center">
+                  <div class="w-2 h-2 rounded-full bg-white"></div>
+                </div>
               </button>
-              <button id="btn-repair-confirm"
-                class="flex-1 py-3 px-4 bg-rose-600/80 hover:bg-rose-600 border border-rose-500/40 text-white font-black text-sm rounded-2xl shadow-lg transition-all"
-                data-i18n="btnDeleteNow">
-                Delete Now
+
+              <!-- Cancel / Dismiss (Circle X - Red #ED3A5A) -->
+              <button id="btn-repair-cancel" title="Cancel"
+                class="sao-btn-cancel group">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
 
@@ -797,53 +965,50 @@
       </div>
     </div>
 
-    <!-- CUSTOM UPDATE MODAL (Inside Launcher Frame) -->
+    <!-- CUSTOM UPDATE MODAL (SAO 3-Part Alert Style) -->
     <div id="update-modal"
-      class="hidden absolute inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md transition-all rounded-3xl no-drag">
+      class="hidden absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all rounded-3xl no-drag">
       <div
-        class="w-[420px] bg-[#0c101c] border border-slate-800/80 rounded-3xl p-7 shadow-2xl flex flex-col items-center text-center space-y-5">
+        class="sao-modal-card flex flex-col shadow-2xl">
 
-        <!-- Icon Badge -->
-        <div id="update-modal-icon-badge"
-          class="w-14 h-14 rounded-2xl custom-accent-bg text-white flex items-center justify-center shadow-lg">
-          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
+        <!-- 1. SAO Header (#FBFBFB) -->
+        <div class="sao-modal-header text-center">
+          <h3 id="update-modal-title" class="text-xl font-black text-slate-800 tracking-wider font-nexon"
+            data-i18n="updateReadyTitle">Update Ready</h3>
         </div>
 
-        <!-- Content -->
-        <div class="space-y-2">
-          <h3 id="update-modal-title" class="text-xl font-black text-white tracking-tight font-nexon"
-            data-i18n="updateReadyTitle">Update Ready</h3>
-          <p id="update-modal-desc" class="text-xs text-slate-300 leading-relaxed font-ekkamaivibe">
-            Version <strong id="update-modal-version" class="custom-accent-text font-bold">1.0.0</strong> downloaded.
+        <!-- 2. SAO Body (#D8D8D8 - Longer & Spacious) -->
+        <div class="sao-modal-body text-center space-y-2.5">
+          <p id="update-modal-desc" class="text-sm md:text-base font-bold text-slate-800 leading-relaxed font-ekkamaivibe">
+            Version <strong id="update-modal-version" class="text-[#3278BE] font-bold">1.0.0</strong> downloaded.
             Restart now to install update.
           </p>
-        </div>
 
-        <!-- Progress Bar (while downloading) -->
-        <div id="update-modal-progress-wrap" class="hidden w-full space-y-1.5">
-          <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
-            <div id="update-modal-progress-bar" class="custom-accent-bg h-full w-0 transition-all duration-200"></div>
+          <!-- Progress Bar (while downloading) -->
+          <div id="update-modal-progress-wrap" class="hidden w-full space-y-1 pt-1">
+            <div class="w-full bg-slate-400/60 rounded-full h-1.5 overflow-hidden border border-slate-400">
+              <div id="update-modal-progress-bar" class="bg-[#3278BE] h-full w-0 transition-all duration-200"></div>
+            </div>
+            <span id="update-modal-progress-text" class="text-[11px] text-slate-700 font-ekkamaivibe font-bold">0%</span>
           </div>
-          <span id="update-modal-progress-text" class="text-[11px] text-slate-400 font-ekkamaivibe">0%</span>
         </div>
 
-        <!-- Action Buttons -->
-        <div id="update-modal-actions" class="flex items-center gap-3 w-full pt-2 font-nexon">
-          <button id="btn-update-restart"
-            class="flex-1 py-3 px-4 custom-accent-bg hover:opacity-90 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            <span data-i18n="btnRestartNow">Restart Now</span>
+        <!-- 3. SAO Footer (#FBFBFB with 46px O & X Buttons close to each other) -->
+        <div id="update-modal-actions" class="sao-modal-footer">
+          <!-- Restart Now (Circle O - Blue #3278BE) -->
+          <button id="btn-update-restart" title="Restart Now"
+            class="sao-btn-confirm group">
+            <div class="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center">
+              <div class="w-2 h-2 rounded-full bg-white"></div>
+            </div>
           </button>
-          <button id="btn-update-later"
-            class="py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-2xl transition-colors"
-            data-i18n="btnLater">
-            Later
+
+          <!-- Later (Circle X - Red #ED3A5A) -->
+          <button id="btn-update-later" title="Later"
+            class="sao-btn-cancel group">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 

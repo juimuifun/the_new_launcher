@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const fs = require('fs');
+const path = require('path');
 
 // ตั้งค่า AutoUpdater ให้ดาวน์โหลดอัตโนมัติทันทีที่เจออัปเดต
 autoUpdater.autoDownload = true;
@@ -83,6 +84,7 @@ function createWindow() {
     maximizable: false,
     frame: false,
     transparent: true,
+    icon: path.join(__dirname, 'assets/favicon.ico'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -198,7 +200,6 @@ ipcMain.handle('check-namespace-exists', (event, folderNamespace) => {
 // ----------------------------------------------------
 // EML-Lib Minecraft Launching & Status System
 // ----------------------------------------------------
-const path = require('path');
 
 // Helper Function: ป้องกันและแก้ปัญหา ENOTDIR โดยการตรวจสอบและลบไฟล์ที่ขวางโฟลเดอร์ในทุกระดับ Subpath
 function ensureDirSafe(targetPath) {
